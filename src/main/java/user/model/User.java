@@ -2,9 +2,9 @@ package user.model;
 
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -18,9 +18,13 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "username", nullable = false)
     private String username;
+    @Column(name = "password", nullable = false)
     private String password;
-    private BigDecimal dollar_ballance;
+    @Column(name = "dollar_balance", nullable = false)
+    private float dollar_balance;
+    @Column(name = "enabled", nullable = false)
     private boolean enabled;
     @CreatedDate
     @Column(name = "created_on")
@@ -28,7 +32,7 @@ public class User implements Serializable {
     @LastModifiedDate
     @Column(name = "updated_on")
     private Timestamp updated_on;
-    
+
     public User(){
         this.enabled = true;
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
@@ -43,51 +47,51 @@ public class User implements Serializable {
         this.id = id;
     }
 
-    @Column(name = "username", nullable = false)
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
 
-    @Column(name = "password", nullable = false)
     public String getPassword() {
         return password;
     }
+
     public void setPassword(String password) {
         this.password = password;
     }
 
-    @Column(name = "dollar_ballance", nullable = false)
-    public BigDecimal getDollar_ballance() {
-        return dollar_ballance;
-    }
-    public void setDollar_ballance(BigDecimal dollar_ballance) {
-        this.dollar_ballance = dollar_ballance;
+    public float getDollar_balance() {
+        return dollar_balance;
     }
 
-    @Column(name = "enabled", nullable = false)
+    public void setDollar_balance(float dollar_balance) {
+        this.dollar_balance = dollar_balance;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
+
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
-
     public Timestamp getCreated_on() {
         return created_on;
     }
-    public void setCreated_on(Timestamp created_on) {
-        this.created_on = Timestamp.valueOf(LocalDateTime.now());
 
+    public void setCreated_on(Timestamp created_on) {
+        this.created_on = created_on;
     }
 
     public Timestamp getUpdated_on() {
         return updated_on;
     }
+
     public void setUpdated_on(Timestamp updated_on) {
-        this.updated_on = Timestamp.valueOf(LocalDateTime.now());
+        this.updated_on = updated_on;
     }
 }

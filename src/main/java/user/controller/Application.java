@@ -4,7 +4,13 @@ import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.*;
+import reactor.core.publisher.Mono;
+import user.model.Stock;
 import user.model.User;
 import user.model.UserOrders;
 import user.repository.UserOrdersRepository;
@@ -15,6 +21,7 @@ import user.repository.UserStockBalancesRepository;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.sql.Array;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -23,6 +30,9 @@ import java.util.Random;
 @CrossOrigin
 @ComponentScan("com.user.repository")
 class UserRestController {
+
+    @Autowired
+    private WebClient webClient;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -51,19 +61,26 @@ class UserRestController {
         return userName + ", your developer's caffeine level is: " + getCaffeineLevel();
     }
 
-    @GetMapping("/users")
-    public List <User> getUsers(Principal principal) {
+    @GetMapping("/user")
+    public List<User> getUsers(Principal principal) {
+
         return userRepository.findAll();
         //return principal.toString();
     }
 
-    @PostMapping("/users")
+    @PostMapping("/user")
     public User createUser(@Valid @RequestBody User user, Principal principal) {
         return userRepository.save(user);
     }
 
-    @PostMapping("/users/order")
+    @PostMapping("/user/order")
     public UserOrders createOrder(@Valid @RequestBody UserOrders order, Principal principal) {
+        Mono<Stock[]> stock =  this.webClient
+                .get()
+                .uri("/stocks")
+                .retrieve()
+                .bodyToMono(Stock[].class);
+        List lista = Arrays.stream(stock.block()).toList();
         if(order.getType() == 1){
             //implementar logica para a venda;
         }
@@ -71,6 +88,11 @@ class UserRestController {
             //implementar logica para a compra;
         }
         return orderRepository.save(order);
+    }
+
+    @GetMapping("/hello")
+    public OidcUserInfo sayHello(@AuthenticationPrincipal OidcUser oidcUser) {
+        return oidcUser.getUserInfo();
     }
 
     private boolean createUserOkta(){
