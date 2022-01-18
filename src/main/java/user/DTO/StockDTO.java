@@ -1,9 +1,9 @@
-package user.model;
+package user.DTO;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
-public class Stock {
+public class StockDTO {
     private Long Id;
     private String stock_symbol;
     private String stock_name;
@@ -14,9 +14,9 @@ public class Stock {
     private Timestamp created_on;
     private Timestamp updated_on;
 
-    public Stock(){
+    public StockDTO(){
     }
-    public Stock(Long id, String stock_symbol, String stock_name, BigDecimal ask_min, BigDecimal ask_max, BigDecimal bid_min, BigDecimal bid_max, Timestamp created_on, Timestamp updated_on) {
+    public StockDTO(Long id, String stock_symbol, String stock_name, BigDecimal ask_min, BigDecimal ask_max, BigDecimal bid_min, BigDecimal bid_max, Timestamp created_on, Timestamp updated_on) {
         Id = id;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;

@@ -2,8 +2,8 @@ package user.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import user.model.User_stock_balances;
+import user.model.UserStockBalances;
 
 @Repository
-public interface UserStockBalancesRepository extends JpaRepository<User_stock_balances,Long>{
+public interface UserStockBalancesRepository extends JpaRepository<UserStockBalances,Long>{
 }

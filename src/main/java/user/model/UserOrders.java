@@ -3,6 +3,7 @@ package user.model;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name ="user_orders")
@@ -18,28 +19,34 @@ public class UserOrders {
     private String stock_symbol;
     private String stock_name;
     private Long volume;
-    private BigDecimal price;
-    private BigDecimal totalPrice;
-    private int remainingVolume;
+    private double price;
+    @Column(name = "total_price")
+    private double totalPrice;
+    @Column(name = "remaining_volume")
+    private Long remainingVolume;
     private int type;
     private int status;
     private Timestamp created_on;
     private Timestamp updated_on;
 
     public UserOrders(){
+        this.created_on = Timestamp.valueOf(LocalDateTime.now());
+        this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
 
-    public UserOrders(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, BigDecimal price, int type, int status, BigDecimal totalPrice, int remainingVolume) {
-        this.user = user;
+    public UserOrders(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, double price, double totalPrice, Long remainingVolume, int type, int status) {
         this.id_stock = id_stock;
+        this.user = user;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;
         this.volume = volume;
         this.price = price;
+        this.totalPrice = totalPrice;
+        this.remainingVolume = remainingVolume;
         this.type = type;
         this.status = status;
-        this.totalPrice= totalPrice;
-        this.remainingVolume = remainingVolume;
+        this.created_on = Timestamp.valueOf(LocalDateTime.now());
+        this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
 
     public Long getId() {
@@ -90,12 +97,28 @@ public class UserOrders {
         this.volume = volume;
     }
 
-    public BigDecimal getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(BigDecimal price) {
+    public void setPrice(double price) {
         this.price = price;
+    }
+
+    public double getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(double totalPrice) {
+        this.totalPrice = totalPrice;
+    }
+
+    public Long getRemainingVolume() {
+        return remainingVolume;
+    }
+
+    public void setRemainingVolume(Long remainingVolume) {
+        this.remainingVolume = remainingVolume;
     }
 
     public int getType() {
@@ -128,21 +151,5 @@ public class UserOrders {
 
     public void setUpdated_on(Timestamp updated_on) {
         this.updated_on = updated_on;
-    }
-
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public int getRemainingVolume() {
-        return remainingVolume;
-    }
-
-    public void setRemainingVolume(int remainingVolume) {
-        this.remainingVolume = remainingVolume;
     }
 }

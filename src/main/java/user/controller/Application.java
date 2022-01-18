@@ -4,13 +4,14 @@ import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.*;
 import reactor.core.publisher.Mono;
-import user.model.Stock;
+import user.DTO.StockDTO;
 import user.model.User;
 import user.model.UserOrders;
 import user.repository.UserOrdersRepository;
@@ -21,9 +22,11 @@ import user.repository.UserStockBalancesRepository;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.sql.Array;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -61,11 +64,19 @@ class UserRestController {
         return userName + ", your developer's caffeine level is: " + getCaffeineLevel();
     }
 
-    @GetMapping("/user")
-    public List<User> getUsers(Principal principal) {
+    @GetMapping(value = "/user/{id}", produces = "application/json")
+    public Optional<User> getUsers(@PathVariable(value = "id") Long user_id, Principal principal) {
+        return userRepository.findById(user_id);
+    }
 
-        return userRepository.findAll();
-        //return principal.toString();
+    @PatchMapping(value = "/user/disable/{id}", produces = "application/json")
+    public User DisableUser(@PathVariable(value = "id") Long user_id, Principal principal) {
+        User user = userRepository.findById(user_id).orElseThrow(Error :: new);
+
+        user.setEnabled(false);
+        user.setUpdated_on(Timestamp.valueOf(LocalDateTime.now()));
+
+        return userRepository.save(user);
     }
 
     @PostMapping("/user")
@@ -73,22 +84,7 @@ class UserRestController {
         return userRepository.save(user);
     }
 
-    @PostMapping("/user/order")
-    public UserOrders createOrder(@Valid @RequestBody UserOrders order, Principal principal) {
-        Mono<Stock[]> stock =  this.webClient
-                .get()
-                .uri("/stocks")
-                .retrieve()
-                .bodyToMono(Stock[].class);
-        List lista = Arrays.stream(stock.block()).toList();
-        if(order.getType() == 1){
-            //implementar logica para a venda;
-        }
-        else{
-            //implementar logica para a compra;
-        }
-        return orderRepository.save(order);
-    }
+
 
     @GetMapping("/hello")
     public OidcUserInfo sayHello(@AuthenticationPrincipal OidcUser oidcUser) {

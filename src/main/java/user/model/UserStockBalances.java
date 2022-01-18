@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name="user_stock_balances")
-@IdClass(User_stock_balances_id.class)
-public class User_stock_balances implements Serializable {
+@IdClass(UserStockBalancesId.class)
+public class UserStockBalances implements Serializable {
 
     @Id
     private Long id_stock;
@@ -32,12 +32,12 @@ public class User_stock_balances implements Serializable {
     @Column(name = "updated_on")
     private Timestamp updated_on;
 
-    public User_stock_balances(){
+    public UserStockBalances(){
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
         this.volume = Long.valueOf(0);
     }
-    public User_stock_balances(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, boolean enabled) {
+    public UserStockBalances(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, boolean enabled) {
         this.id_stock = id_stock;
         this.user = user;
         this.stock_symbol = stock_symbol;
