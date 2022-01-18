@@ -16,7 +16,7 @@ public class CreateOrdersDTO {
     private int status;
 
     public UserOrders transformaParaObjeto(User user){
-        return new UserOrders(user, id_stock, stock_symbol, stock_name, volume, price, total_price, remaining_volume, type, status);
+        return new UserOrders(user, id_stock, stock_symbol, stock_name, volume, price, total_price, remaining_volume, type, 1);
     }
 
     public Long getId_user() {

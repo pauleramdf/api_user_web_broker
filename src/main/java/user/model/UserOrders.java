@@ -32,6 +32,7 @@ public class UserOrders {
     public UserOrders(){
         this.created_on = Timestamp.valueOf(LocalDateTime.now());
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
+        this.status = 1;
     }
 
     public UserOrders(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, double price, double totalPrice, Long remainingVolume, int type, int status) {

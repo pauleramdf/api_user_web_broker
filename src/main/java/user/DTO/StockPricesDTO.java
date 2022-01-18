@@ -5,16 +5,18 @@ public class StockPricesDTO {
     private Long Id;
     private String stock_symbol;
     private String stock_name;
-    private double price;
+    private double minPrice;
+    private double maxPrice;
 
 
     public StockPricesDTO(){};
 
-    public StockPricesDTO(Long id, String stock_symbol, String stock_name, double price) {
+    public StockPricesDTO(Long id, String stock_symbol, String stock_name, double minPrice, double maxPrice) {
         Id = id;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;
-        this.price = price;
+        this.minPrice = minPrice;
+        this.maxPrice = maxPrice;
     }
 
     public Long getId() {
@@ -41,11 +43,19 @@ public class StockPricesDTO {
         this.stock_name = stock_name;
     }
 
-    public double getPrice() {
-        return price;
+    public double getMinPrice() {
+        return minPrice;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setMinPrice(double minPrice) {
+        this.minPrice = minPrice;
+    }
+
+    public double getMaxPrice() {
+        return maxPrice;
+    }
+
+    public void setMaxPrice(double maxPrice) {
+        this.maxPrice = maxPrice;
     }
 }

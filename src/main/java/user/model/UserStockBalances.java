@@ -7,6 +7,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import user.model.User;
 
 @Entity
 @Table(name="user_stock_balances")
@@ -16,7 +17,7 @@ public class UserStockBalances implements Serializable {
     @Id
     private Long id_stock;
 
-    @ManyToOne
+    @ManyToOne(targetEntity = User.class)
     @JoinColumn(name="id_user")
     @Id
     private User user;
@@ -38,11 +39,14 @@ public class UserStockBalances implements Serializable {
         this.volume = Long.valueOf(0);
     }
     public UserStockBalances(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, boolean enabled) {
-        this.id_stock = id_stock;
+
         this.user = user;
+        this.id_stock = id_stock;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;
         this.volume = volume;
+        this.created_on = Timestamp.valueOf(LocalDateTime.now());
+        this.updated_on = Timestamp.valueOf(LocalDateTime.now());
         this.enabled = enabled;
     }
 

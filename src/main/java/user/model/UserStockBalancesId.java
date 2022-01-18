@@ -8,8 +8,26 @@ public class UserStockBalancesId implements Serializable {
 
     private Long id_stock;
 
+    public UserStockBalancesId() {
+    }
     public UserStockBalancesId(User user, Long id_stock) {
         this.user = user;
+        this.id_stock = id_stock;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Long getId_stock() {
+        return id_stock;
+    }
+
+    public void setId_stock(Long id_stock) {
         this.id_stock = id_stock;
     }
 

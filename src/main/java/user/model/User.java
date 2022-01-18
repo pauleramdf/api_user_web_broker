@@ -1,5 +1,6 @@
 package user.model;
 
+import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,6 +21,7 @@ public class User implements Serializable {
     private Long id;
     @Column(name = "username", nullable = false)
     private String username;
+    @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
     @Column(name = "dollar_balance", nullable = false)
