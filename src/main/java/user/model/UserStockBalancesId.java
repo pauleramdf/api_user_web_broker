@@ -1,33 +1,29 @@
 package user.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.Embeddable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Getter
+@Setter
+@Embeddable
 public class UserStockBalancesId implements Serializable {
-    private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "id_user")
+    private User user;
     private Long id_stock;
 
     public UserStockBalancesId() {
     }
+
     public UserStockBalancesId(User user, Long id_stock) {
         this.user = user;
-        this.id_stock = id_stock;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Long getId_stock() {
-        return id_stock;
-    }
-
-    public void setId_stock(Long id_stock) {
         this.id_stock = id_stock;
     }
 

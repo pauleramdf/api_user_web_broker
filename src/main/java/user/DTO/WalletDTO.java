@@ -3,6 +3,7 @@ package user.DTO;
 import user.model.User;
 import user.model.UserOrders;
 import user.model.UserStockBalances;
+import user.model.UserStockBalancesId;
 
 import java.sql.Timestamp;
 import java.util.function.LongPredicate;
@@ -20,9 +21,10 @@ public class WalletDTO {
 
     public WalletDTO(){}
 
-    public WalletDTO(Long id_stock, Long id_user, String stock_symbol, String stock_name, Long volume, boolean enabled, Timestamp created_on, Timestamp updated_on) {
-        this.id_stock = id_stock;
+    public WalletDTO(Long id_user,Long id_stock, String stock_symbol, String stock_name, Long volume, boolean enabled, Timestamp created_on, Timestamp updated_on) {
+
         this.id_user = id_user;
+        this.id_stock = id_stock;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;
         this.volume = volume;
@@ -56,7 +58,7 @@ public class WalletDTO {
     }
 
     public UserStockBalances transformaObjeto(User user){
-        return new UserStockBalances(user, id_stock,  stock_symbol,  stock_name,  volume, enabled);
+        return new UserStockBalances( new UserStockBalancesId(user, id_stock),  stock_symbol,  stock_name,  volume, enabled);
     }
 
     public Long getId_stock() {

@@ -1,5 +1,7 @@
 package user.model;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 import javax.persistence.*;
 
 @Entity
+@Getter
+@Setter
 @Table(name="users")
 public class User implements Serializable {
     private static final long serialversionUID = 1L;
@@ -25,7 +29,7 @@ public class User implements Serializable {
     @Column(name = "password", nullable = false)
     private String password;
     @Column(name = "dollar_balance", nullable = false)
-    private float dollar_balance;
+    private double dollar_balance;
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
     @CreatedDate
@@ -41,59 +45,4 @@ public class User implements Serializable {
         this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public float getDollar_balance() {
-        return dollar_balance;
-    }
-
-    public void setDollar_balance(float dollar_balance) {
-        this.dollar_balance = dollar_balance;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public Timestamp getCreated_on() {
-        return created_on;
-    }
-
-    public void setCreated_on(Timestamp created_on) {
-        this.created_on = created_on;
-    }
-
-    public Timestamp getUpdated_on() {
-        return updated_on;
-    }
-
-    public void setUpdated_on(Timestamp updated_on) {
-        this.updated_on = updated_on;
-    }
 }
