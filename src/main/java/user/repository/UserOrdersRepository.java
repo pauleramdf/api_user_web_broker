@@ -14,15 +14,15 @@ import java.util.Optional;
 @Repository
 public interface UserOrdersRepository extends JpaRepository<UserOrders, Long> {
 
-    @Query(nativeQuery = true, value="SELECT * FROM user_orders o where o.type = 0 AND o.status = 1 and o.stock_name = :stock_name order by  o.created_on asc")
-    List<UserOrders> findAllBuyOrders(@Param("stock_name") String stock_name);
+    @Query(nativeQuery = true, value="SELECT * FROM user_orders o where o.type = 0 AND o.status = 1 and o.id_stock = :id_stock order by  o.created_on asc")
+    List<UserOrders> findAllBuyOrders(@Param("id_stock") Long id_stock);
 
-    @Query(nativeQuery = true, value="SELECT * FROM user_orders o where o.type = 1 AND o.status = 1 and o.stock_name = :stock_name order by  o.created_on asc ")
-    List<UserOrders> findAllSellOrders(@Param("stock_name") String stock_name);
+    @Query(nativeQuery = true, value="SELECT * FROM user_orders o where o.type = 1 AND o.status = 1 and o.id_stock = :id_stock order by  o.created_on asc ")
+    List<UserOrders> findAllSellOrders(@Param("id_stock") Long id_stock);
 
-    @Query("SELECT new user.DTO.MaxMinDTO(max(o.price),min(o.price)) FROM UserOrders o where o.type = 0 AND o.status = 1 AND o.stock_name = :stock_name")
-    Optional<MaxMinDTO> findMaxMinBuyOrders(@Param("stock_name") String stock_name);
+    @Query("SELECT new user.DTO.MaxMinDTO(max(o.price),min(o.price)) FROM UserOrders o where o.type = 0 AND o.status = 1 AND o.id_stock = :id_stock")
+    Optional<MaxMinDTO> findMaxMinBuyOrders(@Param("id_stock") Long id_stock);
 
-    @Query("SELECT new user.DTO.MaxMinDTO (max(o.price),min(o.price)) FROM UserOrders o where o.type = 1 AND o.status = 1 AND o.stock_name = :stock_name")
-    Optional<MaxMinDTO> findMaxMinSellOrders(@Param("stock_name") String stock_name);
+    @Query("SELECT new user.DTO.MaxMinDTO (max(o.price),min(o.price)) FROM UserOrders o where o.type = 1 AND o.status = 1 AND o.id_stock = :id_stock")
+    Optional<MaxMinDTO> findMaxMinSellOrders(@Param("id_stock") Long id_stock);
 }

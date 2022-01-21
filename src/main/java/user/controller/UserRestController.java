@@ -4,89 +4,76 @@ import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
 import com.okta.idx.sdk.api.client.ProceedContext;
 import com.okta.idx.sdk.api.model.UserProfile;
 import com.okta.idx.sdk.api.response.AuthenticationResponse;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.reactive.function.client.*;
-import reactor.core.publisher.Mono;
+import user.DTO.CreateUserDTO;
 import user.DTO.StockDTO;
+import user.DTO.UserResponseDTO;
 import user.model.User;
-import user.model.UserOrders;
-import user.repository.UserOrdersRepository;
 import user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import user.repository.UserStockBalancesRepository;
+import user.service.StocksService;
 
 import javax.validation.Valid;
 import java.security.Principal;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 @RestController
 @CrossOrigin
 @ComponentScan("com.user.repository")
+@RequestMapping(consumes = "application/json")
 class UserRestController {
 
     @Autowired
-    private WebClient webClient;
-    @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserOrdersRepository orderRepository;
-    @Autowired
-    private UserStockBalancesRepository stockBalanceRepository;
 
-    String getCaffeineLevel() {
-        List<String> givenList = Arrays.asList(
-                "Head on table asleep. Needs coffee now!",
-                "Not at all. What's wrong?!",
-                "Mildly. Boring.",
-                "Making progress.",
-                "Everything is awesome. Stuff is definitely happening.",
-                "Eyeballs are rolling around in my head and I'm shouting at my coworker about JHipster.",
-                "The LD50 of caffeine is 100 cups. Your developer has had 99 and is talking to the bike rack outside while jogging in place."
-        );
-        Random rand = new Random();
-        String caffeineLevelString = givenList.get(rand.nextInt(givenList.size()));
-        return caffeineLevelString;
-    }
+    @Autowired
+    private StocksService stocksService;
 
-    @GetMapping("/howcaffeinatedami")
-    public String getCaffeineLevel(Principal principal) {
-        String userName = principal != null ? principal.getName() : "Anonymous";
-        return userName + ", your developer's caffeine level is: " + getCaffeineLevel();
+    @GetMapping(value = "/stocks/{id}", produces = "application/json")
+    public ResponseEntity<?> getStocks(@Valid @PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
+        StockDTO stock = stocksService.getStock(id, token);
+        return new ResponseEntity<>(stock, HttpStatus.OK);
     }
 
     @GetMapping(value = "/user/{id}", produces = "application/json")
-    public Optional<User> getUsers(@PathVariable(value = "id") Long user_id, Principal principal) {
-        return userRepository.findById(user_id);
+    public ResponseEntity<?> getUser( @Valid @PathVariable(value = "id") Long user_id, Principal principal) {
+        UserResponseDTO u = new UserResponseDTO(userRepository.findById(user_id).orElseThrow());
+        return new ResponseEntity<>(u, HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/user", produces = "application/json")
+    public ResponseEntity<?>  getUsers() {
+        List<UserResponseDTO> ls = new ArrayList<>();
+        List<User> list = userRepository.findAll();
+        for (User user: list
+             ) {
+            ls.add(new UserResponseDTO(user));
+        }
+        return new ResponseEntity<>(ls, HttpStatus.OK);
     }
 
     @PatchMapping(value = "/user/disable/{id}", produces = "application/json")
-    public User DisableUser(@PathVariable(value = "id") Long user_id, Principal principal) {
-        User user = userRepository.findById(user_id).orElseThrow(Error :: new);
+    public ResponseEntity<?>  DisableUser(@Valid @PathVariable(value = "id") Long user_id, Principal principal) {
 
+        User user = userRepository.findById(user_id).orElseThrow();
         user.setEnabled(false);
-        user.setUpdated_on(Timestamp.valueOf(LocalDateTime.now()));
-
-        return userRepository.save(user);
+        UserResponseDTO u = new UserResponseDTO(userRepository.save(user));
+        return new ResponseEntity<>(u,HttpStatus.OK );
     }
 
-    @PostMapping("/user")
-    public User createUser(@Valid @RequestBody User user, Principal principal) {
-        return userRepository.save(user);
+    @PostMapping(value = "/user", produces = "application/json")
+    public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserDTO userDTO, Principal principal) {
+        User user = userDTO.transformaDTO();
+        return new ResponseEntity<>(userRepository.save(user), HttpStatus.CREATED);
     }
 
-
-
-    @GetMapping("/hello")
+    @GetMapping(value = "/hello", produces = "application/json")
     public OidcUserInfo sayHello(@AuthenticationPrincipal OidcUser oidcUser) {
         return oidcUser.getUserInfo();
     }

@@ -1,5 +1,10 @@
 package user.DTO;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class MaxMinDTO {
 
     Double maxPrice;
@@ -16,19 +21,4 @@ public class MaxMinDTO {
 
     }
 
-    public Double getMaxPrice() {
-        return maxPrice;
-    }
-
-    public void setMaxPrice(Double maxPrice) {
-        this.maxPrice = maxPrice;
-    }
-
-    public Double getMinPrice() {
-        return minPrice;
-    }
-
-    public void setMinPrice(Double minPrice) {
-        this.minPrice = minPrice;
-    }
 }

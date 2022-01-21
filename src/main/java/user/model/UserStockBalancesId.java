@@ -13,6 +13,7 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class UserStockBalancesId implements Serializable {
+    private static final long serialversionUID = 1L;
 
     @ManyToOne
     @JoinColumn(name = "id_user")

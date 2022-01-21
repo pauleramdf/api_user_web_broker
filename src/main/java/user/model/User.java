@@ -3,9 +3,8 @@ package user.model;
 import lombok.Getter;
 import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -23,26 +22,37 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "username", nullable = false)
     private String username;
-    @JsonIgnore
+
     @Column(name = "password", nullable = false)
     private String password;
+
     @Column(name = "dollar_balance", nullable = false)
-    private double dollar_balance;
+    private Double dollar_balance;
+
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
-    @CreatedDate
+
+    @CreationTimestamp
     @Column(name = "created_on")
     private Timestamp created_on;
-    @LastModifiedDate
+    @UpdateTimestamp
     @Column(name = "updated_on")
     private Timestamp updated_on;
 
-    public User(){
+    @PrePersist
+    private void onCreate(){
         this.enabled = true;
-        this.created_on = Timestamp.valueOf(LocalDateTime.now());
-        this.updated_on = Timestamp.valueOf(LocalDateTime.now());
     }
 
+    public User(){
+    }
+
+    public User(String username, String password, Double dollar_balance) {
+        this.username = username;
+        this.password = password;
+        this.dollar_balance = dollar_balance;
+    }
 }
