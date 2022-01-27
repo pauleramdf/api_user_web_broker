@@ -2,7 +2,7 @@ package user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import user.DTO.FindAllByUserDTO;
+import user.dto.FindAllByUserDTO;
 import user.model.UserStockBalances;
 import user.model.UserStockBalancesId;
 import user.repository.UserStockBalancesRepository;
@@ -40,6 +40,7 @@ public class StockBalanceService {
     }
 
     public List<FindAllByUserDTO> findAllByUser(Long id) {
-        return userStockBalancesRepository.findAllByUser(id);
+        List<FindAllByUserDTO> wallets = userStockBalancesRepository.findAllByUser(id).stream().map((wallet)-> new FindAllByUserDTO(wallet)).toList();
+        return wallets;
     }
 }

@@ -1,4 +1,4 @@
-package user.DTO;
+package user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -11,9 +11,9 @@ import javax.validation.constraints.*;
 @Getter
 @Setter
 public class CreateOrdersDTO {
-    @Min(1)
-    @NotNull
-    private Long id_user;
+
+    @NotBlank
+    private String username;
     @Min(1)
     @NotNull
     private Long id_stock;

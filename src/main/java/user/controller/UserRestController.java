@@ -1,24 +1,21 @@
 package user.controller;
 
-import com.okta.idx.sdk.api.client.IDXAuthenticationWrapper;
-import com.okta.idx.sdk.api.client.ProceedContext;
-import com.okta.idx.sdk.api.model.UserProfile;
-import com.okta.idx.sdk.api.response.AuthenticationResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import user.DTO.CreateUserDTO;
-import user.DTO.StockDTO;
-import user.DTO.UserResponseDTO;
+import user.dto.CreateUserDTO;
+import user.dto.StockDTO;
+import user.dto.UserResponseDTO;
 import user.model.User;
 import user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import user.service.StocksService;
+import user.service.UserService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.*;
@@ -26,7 +23,7 @@ import java.util.*;
 @RestController
 @CrossOrigin
 @ComponentScan("com.user.repository")
-@RequestMapping(consumes = "application/json")
+@RequestMapping
 class UserRestController {
 
     @Autowired
@@ -34,6 +31,9 @@ class UserRestController {
 
     @Autowired
     private StocksService stocksService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping(value = "/stocks/{id}", produces = "application/json")
     public ResponseEntity<?> getStocks(@Valid @PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
@@ -43,14 +43,14 @@ class UserRestController {
 
     @GetMapping(value = "/user/{id}", produces = "application/json")
     public ResponseEntity<?> getUser( @Valid @PathVariable(value = "id") Long user_id, Principal principal) {
-        UserResponseDTO u = new UserResponseDTO(userRepository.findById(user_id).orElseThrow());
+        UserResponseDTO u = new UserResponseDTO(userService.findById(user_id).orElseThrow());
         return new ResponseEntity<>(u, HttpStatus.OK);
     }
 
     @GetMapping(value = "/user", produces = "application/json")
     public ResponseEntity<?>  getUsers() {
         List<UserResponseDTO> ls = new ArrayList<>();
-        List<User> list = userRepository.findAll();
+        List<User> list = userService.findAll();
         for (User user: list
              ) {
             ls.add(new UserResponseDTO(user));
@@ -61,48 +61,23 @@ class UserRestController {
     @PatchMapping(value = "/user/disable/{id}", produces = "application/json")
     public ResponseEntity<?>  DisableUser(@Valid @PathVariable(value = "id") Long user_id, Principal principal) {
 
-        User user = userRepository.findById(user_id).orElseThrow();
+        User user = userService.findById(user_id).orElseThrow();
         user.setEnabled(false);
-        UserResponseDTO u = new UserResponseDTO(userRepository.save(user));
+        UserResponseDTO u = new UserResponseDTO(userService.save(user));
         return new ResponseEntity<>(u,HttpStatus.OK );
     }
 
     @PostMapping(value = "/user", produces = "application/json")
     public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserDTO userDTO, Principal principal) {
         User user = userDTO.transformaDTO();
-        return new ResponseEntity<>(userRepository.save(user), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.save(user), HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/hello", produces = "application/json")
-    public OidcUserInfo sayHello(@AuthenticationPrincipal OidcUser oidcUser) {
-        return oidcUser.getUserInfo();
+    public String sayHello( java.security.Principal user, @AuthenticationPrincipal Jwt jwt) {
+         return String.format("Hello, %s!", user);
     }
 
-    private boolean createUserOkta(){
-        try{
-            IDXAuthenticationWrapper idxAuthenticationWrapper = new IDXAuthenticationWrapper();
-            AuthenticationResponse beginResponse = idxAuthenticationWrapper.begin();
-
-            ProceedContext beginProceedContext = beginResponse.getProceedContext();
-
-            AuthenticationResponse newUserRegistrationResponse = idxAuthenticationWrapper.fetchSignUpFormValues(beginProceedContext);
-
-            UserProfile userProfile = new UserProfile();
-            userProfile.addAttribute("lastName", "lastname");
-            userProfile.addAttribute("firstName", "firstname");
-            userProfile.addAttribute("email", "email");
-            userProfile.addAttribute("password", "password");
-
-
-            ProceedContext proceedContext = newUserRegistrationResponse.getProceedContext();
-
-            AuthenticationResponse authenticationResponse =
-                    idxAuthenticationWrapper.register(proceedContext, userProfile);
-        }catch(Exception e){
-            return false;
-        }
-        return true;
-    }
 
 }
 

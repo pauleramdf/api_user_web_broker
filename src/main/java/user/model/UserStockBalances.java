@@ -31,14 +31,13 @@ public class UserStockBalances implements Serializable {
     @CreationTimestamp
     @Column(name = "created_on")
     private Timestamp created_on;
+
     @UpdateTimestamp
     @Column(name = "updated_on")
     private Timestamp updated_on;
 
     public UserStockBalances(){
         this.volume = Long.valueOf(0);
-        System.out.println(this.created_on);
-        System.out.println(this.updated_on);
     }
 
     public UserStockBalances(UserStockBalancesId id, String stock_symbol, String stock_name, Long volume) {
@@ -46,8 +45,6 @@ public class UserStockBalances implements Serializable {
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;
         this.volume = volume;
-        System.out.println(this.created_on);
-        System.out.println(this.updated_on);
     }
 
     public UserStockBalances(UserStockBalancesId id, String stock_symbol, String stock_name, Long volume,Timestamp created_on, Timestamp updated_on) {

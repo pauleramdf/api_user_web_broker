@@ -1,12 +1,12 @@
-package user.DTO;
+package user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
 import user.model.User;
-import user.model.UserOrders;
 import user.model.UserStockBalances;
 import user.model.UserStockBalancesId;
 
+import javax.validation.constraints.NotBlank;
 import java.sql.Timestamp;
 
 @Getter
@@ -14,7 +14,8 @@ import java.sql.Timestamp;
 public class WalletDTO {
 
     private Long id_stock;
-    private Long id_user;
+    @NotBlank
+    private String username;
     private String stock_symbol;
     private String stock_name;
     private Long volume;
@@ -23,9 +24,9 @@ public class WalletDTO {
 
     public WalletDTO(){}
 
-    public WalletDTO(Long id_user,Long id_stock, String stock_symbol, String stock_name, Long volume, Timestamp created_on, Timestamp updated_on) {
+    public WalletDTO(String username,Long id_stock, String stock_symbol, String stock_name, Long volume, Timestamp created_on, Timestamp updated_on) {
 
-        this.id_user = id_user;
+        this.username = username;
         this.id_stock = id_stock;
         this.stock_symbol = stock_symbol;
         this.stock_name = stock_name;

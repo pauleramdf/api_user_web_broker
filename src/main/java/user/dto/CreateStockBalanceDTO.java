@@ -1,6 +1,6 @@
-package user.DTO;
+package user.dto;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,18 +11,21 @@ import user.model.UserStockBalancesId;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateStockBalanceDTO {
 
 
     @Min(1)
     @NotNull
     private Long id_stock;
-    @Min(1)
-    @NotNull
-    private Long id_user;
+    @NotBlank
+    private String username;
     @NotBlank
     private String stock_symbol;
     @NotBlank
@@ -31,20 +34,10 @@ public class CreateStockBalanceDTO {
     @NotNull
     private Long volume;
 
-    public CreateStockBalanceDTO(){
-
-    }
-    public CreateStockBalanceDTO(Long id_user, Long id_stock, String stock_symbol, String stock_name, Long volume) {
-
-        this.id_user = id_user;
-        this.id_stock = id_stock;
-        this.stock_symbol = stock_symbol;
-        this.stock_name = stock_name;
-        this.volume = volume;
-    }
 
     public UserStockBalances transformaDTO(User user) {
-        return new UserStockBalances(new UserStockBalancesId(user, id_stock), stock_symbol, stock_name, volume);
+        UserStockBalances u = new UserStockBalances(new UserStockBalancesId(user, id_stock), stock_symbol, stock_name, Long.valueOf(0), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
+        return u;
     }
 
 }

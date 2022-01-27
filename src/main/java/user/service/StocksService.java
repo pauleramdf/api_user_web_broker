@@ -7,10 +7,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import user.DTO.CreateOrdersDTO;
-import user.DTO.MaxMinDTO;
-import user.DTO.StockDTO;
-import user.DTO.StockPricesDTO;
+import user.dto.MaxMinDTO;
+import user.dto.StockDTO;
+import user.dto.StockPricesDTO;
 
 @Service("stocksService")
 public class StocksService {
@@ -20,45 +19,17 @@ public class StocksService {
     private OrderService orderService;
 
 
-    public void setMaxMinBuy(CreateOrdersDTO order, String token){
-        StockPricesDTO stockPrices;
-        MaxMinDTO maxmin = orderService.findMaxMinBuyOrders(order.getId_stock());
-        if(maxmin.getMaxPrice() == null){
-            stockPrices = new StockPricesDTO(order.getId_stock(), order.getStock_symbol(), order.getStock_name(), order.getPrice(), order.getPrice());
-        }
-        else{
-            stockPrices = new StockPricesDTO(order.getId_stock(), order.getStock_symbol(), order.getStock_name(), maxmin.getMinPrice(), maxmin.getMaxPrice());
-        }
-        Mono<String> str = this.webClient
+    public void setAskBid(StockPricesDTO stockPrices, String token){
+        Mono<StockDTO> stock = this.webClient
                 .post()
-                .uri("/stocks/buy")
+                .uri("/stocks/askbid")
                 .header(HttpHeaders.AUTHORIZATION, token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromObject(stockPrices))
                 .retrieve()
-                .bodyToMono(String.class);
-        System.out.println(str.block());
-    }
+                .bodyToMono(StockDTO.class);
 
-
-    public void setMaxMinSell(CreateOrdersDTO order, String token){
-        StockPricesDTO stockPrices;
-        MaxMinDTO maxmin = orderService.findMaxMinSellOrders(order.getId_stock());
-        if(maxmin.getMaxPrice() == null){
-            stockPrices = new StockPricesDTO(order.getId_stock(), order.getStock_symbol(), order.getStock_name(), order.getPrice(), order.getPrice());
-        }
-        else{
-            stockPrices = new StockPricesDTO(order.getId_stock(), order.getStock_symbol(), order.getStock_name(), maxmin.getMinPrice(), maxmin.getMaxPrice());
-        }
-        Mono<String> str = this.webClient
-                .post()
-                .uri("/stocks/sell")
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromObject(stockPrices))
-                .retrieve()
-                .bodyToMono(String.class);
-        System.out.println(str.block());
+        stock.block();
     }
 
     public StockDTO getStock(Long id, String token){
@@ -69,5 +40,26 @@ public class StocksService {
                 .retrieve()
                 .bodyToMono(StockDTO.class);
         return str.block();
+    }
+
+    public void updateAskBid(Long id_stock,String token) {
+
+        System.out.println("id da stock " +id_stock);
+        MaxMinDTO bid = orderService.findMaxMinBuyOrders(id_stock);
+        MaxMinDTO ask = orderService.findMaxMinSellOrders(id_stock);
+
+        System.out.println(bid.getMaxPrice() +"   "+ bid.getMinPrice());
+        System.out.println(ask.getMaxPrice() +"   "+ ask.getMinPrice());
+
+        StockPricesDTO stockPrices = new StockPricesDTO();
+        stockPrices.setId_stock(id_stock);
+        stockPrices.setAskMax(ask.getMaxPrice());
+        stockPrices.setAskMin(ask.getMinPrice());
+        stockPrices.setBidMax(bid.getMaxPrice());
+        stockPrices.setBidMin(bid.getMinPrice());
+
+//        System.out.println("ue "+ stockPrices.getMaxPrice() +"   "+ stockPrices.getMinPrice());
+//        System.out.println("ue "+stockPrices.getMaxPrice() +"   "+ stockPrices.getMinPrice());
+        setAskBid(stockPrices, token);
     }
 }

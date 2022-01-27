@@ -1,4 +1,4 @@
-package user.DTO;
+package user.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,11 +14,8 @@ public class MaxMinDTO {
 
     }
     public MaxMinDTO(Double maxPrice, Double minPrice) {
-        if(!(maxPrice == null)){
             this.maxPrice = maxPrice;
             this.minPrice = minPrice;
-        }
-
     }
 
 }
