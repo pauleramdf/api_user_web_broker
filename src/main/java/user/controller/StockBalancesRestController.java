@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import user.dto.CreateStockBalanceDTO;
 import user.dto.FindAllByUserDTO;
+import user.dto.GetStockBalancesDTO;
 import user.model.User;
 import user.model.UserStockBalances;
 import user.repository.UserRepository;
@@ -27,9 +28,10 @@ public class StockBalancesRestController {
     @Autowired
     private StockBalanceService stockBalanceService;
 
-    @GetMapping("stockbalances/{id}")
-    public ResponseEntity<?> getStockBalances(@Valid @PathVariable(value = "id") Long id){
-        List<FindAllByUserDTO> wallet =  stockBalanceService.findAllByUser(id);
+    @PostMapping("stockbalances/")
+    public ResponseEntity<?> getStockBalances(@Valid @RequestBody() GetStockBalancesDTO stockBalancesDTO){
+        User user = userRepository.findByName(stockBalancesDTO.getUsername()).orElseThrow();
+        List<FindAllByUserDTO> wallet =  stockBalanceService.findAllByUser(user.getId());
         return new ResponseEntity<>(wallet, HttpStatus.OK);
     }
 

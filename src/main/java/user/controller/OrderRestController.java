@@ -2,12 +2,17 @@ package user.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import user.dto.CancelOrdersDTO;
-import user.dto.CreateOrdersDTO;
+import user.dto.PageDto;
+import user.dto.userOrders.CreateOrdersDTO;
 import user.dto.MaxMinDTO;
+import user.dto.userOrders.UserOrdersDto;
 import user.model.User;
 import user.model.UserOrders;
 import user.model.UserStockBalances;
@@ -18,7 +23,6 @@ import user.service.StocksService;
 import user.service.UserService;
 
 import javax.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -39,7 +43,7 @@ public class OrderRestController {
     private UserService userService;
 
     @PostMapping("/order")
-    public ResponseEntity<UserOrders> createOrder( @RequestBody @Valid CreateOrdersDTO order, @RequestHeader("Authorization") String token, Principal principal) {
+    public ResponseEntity<UserOrders> createOrder( @RequestBody @Valid CreateOrdersDTO order, @RequestHeader("Authorization") String token) {
 
         //checa se o user existe de fato
         User user = userService.findByName(order.getUsername()).orElseThrow(Error::new);
@@ -51,7 +55,7 @@ public class OrderRestController {
 
         //pega a carteira existente ou caso não exista cria uma zerada
         UserStockBalances wallet
-                = stockBalanceService.findById(new UserStockBalancesId(user, order.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(user, order.getId_stock()), order.getStock_symbol(), order.getStock_name(), Long.valueOf(0)));
+                = stockBalanceService.findById(new UserStockBalancesId(user, order.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(user, order.getId_stock()), order.getStock_symbol(), order.getStock_name(),0L));
 
         if (order.getType() == 1) {
             return sellDomain(user, createdOrder, wallet, token);
@@ -71,15 +75,16 @@ public class OrderRestController {
                 //invalid
                 throw new RuntimeException();
             }
-           return;
+            stockBalanceService.subVolumeWallet(wallet, order.getVolume());
         }
         else{
             if (user.getDollar_balance() < order.getPrice()*order.getVolume()) {
                 //invalid
                 throw new RuntimeException();
             }
-            return;
+            userService.subDollarBalance(user, order.getPrice()*order.getVolume());
         }
+        return;
     }
 
     public ResponseEntity<UserOrders> sellDomain(User user, UserOrders order, UserStockBalances wallet, String token){
@@ -102,8 +107,6 @@ public class OrderRestController {
                 //checa se essa ordem tem preço compativel com a ordem de venda
                 if (o.getRemainingVolume() <= order.getRemainingVolume()) {
 
-                    //subtrai da stockBalance o user atual
-                    stockBalanceService.subVolumeWallet(wallet, o.getRemainingVolume());
                     //subtrai o volume da ordem de venda
                     orderService.subVolume(order, o.getRemainingVolume());
 
@@ -111,11 +114,9 @@ public class OrderRestController {
                     userService.addDollarBalance(user, o.getPrice()* o.getRemainingVolume());
 
                     //acha a carteida do user dono da ordem de compra
-                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(o.getUser(),o.getId_stock()), o.getStock_symbol(), o.getStock_name(), o.getVolume()));
+                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElseThrow();
                     //acrescenta na stockBalance do user dono da ordem de compra
                     stockBalanceService.addVolumeWallet(newWallet, o.getRemainingVolume());
-                    //debita o valor na carteira do user dono da ordem de compra
-                    userService.subDollarBalance(o.getUser(), o.getPrice()*o.getRemainingVolume());
 
                     orderService.subVolume(o, o.getRemainingVolume());
 
@@ -124,17 +125,14 @@ public class OrderRestController {
 
                     //atualiza o volume restante na ordem de compra
                     orderService.subVolume(o, order.getRemainingVolume());
-                    //debita o volume na stockWallet do user dono da ordem de venda
-                    stockBalanceService.subVolumeWallet(wallet, order.getRemainingVolume());
+
                     //credita o valor na carteira do user dono da ordem de venda
                     userService.addDollarBalance(user, o.getPrice()* order.getRemainingVolume());
 
                     //acha a carteida do user dono da ordem de compra
-                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(o.getUser(),o.getId_stock()), o.getStock_symbol(), o.getStock_name(), o.getVolume()));
+                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElseThrow();
                     //acrescenta na stockBalance do user dono da ordem de compra
                     stockBalanceService.subVolumeWallet(newWallet, order.getRemainingVolume());
-                    //debita o valor na carteira do user dono da ordem de compra
-                    userService.subDollarBalance(o.getUser(), o.getPrice()* order.getRemainingVolume());
 
                     //atualiza o volume restante na ordem de venda
                     orderService.subVolume(order, order.getRemainingVolume());
@@ -154,6 +152,7 @@ public class OrderRestController {
         stocksService.updateAskBid(order.getId_stock(), token);
         //caso nao existam ordens de compra abertas para essa stock a ordem é salva.
         if (orders.isEmpty()) {
+            stockBalanceService.save(wallet);
             return new ResponseEntity<>(order, HttpStatus.CREATED);
         } else {
             for (UserOrders o : orders) {
@@ -169,13 +168,6 @@ public class OrderRestController {
                     stockBalanceService.addVolumeWallet(wallet, o.getRemainingVolume());
                     orderService.subVolume(order, o.getRemainingVolume());
 
-                    //credita o valor na carteira
-                    userService.subDollarBalance(user, order.getPrice()*o.getRemainingVolume());
-
-                    //acha a carteida do user dono da ordem de compra
-                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(o.getUser(),o.getId_stock()), o.getStock_symbol(), o.getStock_name(), o.getVolume()));
-                    //acrescenta na stockBalance do user dono da ordem de compra
-                    stockBalanceService.subVolumeWallet(newWallet, o.getRemainingVolume());
                     //debita o valor na carteira do user dono da ordem de compra
                     userService.addDollarBalance(o.getUser(), order.getPrice() * o.getRemainingVolume());
                     orderService.subVolume(o, o.getRemainingVolume());
@@ -186,13 +178,7 @@ public class OrderRestController {
                     orderService.subVolume(o, order.getRemainingVolume());
                     //debita o volume na stockWallet do user dono da ordem de venda
                     stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
-                    //credita o valor na carteira do user dono da ordem de venda
-                    userService.subDollarBalance(user, order.getPrice() * order.getRemainingVolume());
 
-                    //acha a carteida do user dono da ordem de compra
-                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(o.getUser(),o.getId_stock()), o.getStock_symbol(), o.getStock_name(), o.getVolume()));
-                    //acrescenta na stockBalance do user dono da ordem de compra
-                    stockBalanceService.subVolumeWallet(newWallet, order.getRemainingVolume());
                     //debita o valor na carteira do user dono da ordem de compra
                     userService.addDollarBalance(o.getUser(), order.getPrice()* order.getRemainingVolume());
 
@@ -223,9 +209,40 @@ public class OrderRestController {
     }
 
     @PostMapping("/order/cancel")
-    public ResponseEntity<?> cancelOrder(@Valid @RequestBody CancelOrdersDTO order){
+    public ResponseEntity<?> cancelOrder(@Valid @RequestBody CancelOrdersDTO orderdto){
         //cancela a ordem de Compra/Venda
         //resititui o volume ou dollar balance que ainda não foi utilizado
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        System.out.println("ate aqui foi");
+        User user = userService.findByName(orderdto.getUser_name()).orElseThrow();
+        UserOrders order = orderService.findById(orderdto.getId()).orElseThrow();
+        System.out.println("ate aqui foi");
+
+        if(order.getStatus() == 1){
+            orderService.disable(order);
+            if(order.getType() == 1){
+                //restituii sotckbalance
+                UserStockBalances wallet = stockBalanceService.findWallet( new UserStockBalancesId(user,orderdto.getId_stock())).orElseThrow();
+                stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
+            }
+            else{
+                //restitui o dinheiro
+                Double restituicao = order.getRemainingVolume() * order.getPrice();
+                userService.addDollarBalance(user, restituicao);
+
+            }
+            return new ResponseEntity<>(order, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
+    @PostMapping("order/paged")
+    public ResponseEntity<Page<UserOrdersDto>> getPage(@RequestBody PageDto page) {
+        try {
+            Pageable pageable = PageRequest.of(page.getPage(), page.getSize());
+            return ResponseEntity.ok().body(orderService.findUserOrders(pageable, page.getUsername()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

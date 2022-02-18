@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -25,7 +24,7 @@ public class Application {
     @Bean
     public WebClient webClient(WebClient.Builder builder){
         return  builder
-                .baseUrl("http://localhost:8083")
+                .baseUrl("http://apistocks:8083")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
@@ -40,14 +39,4 @@ public class Application {
                     .oauth2ResourceServer().jwt();
         }
     }
-
-//    @EnableGlobalMethodSecurity(prePostEnabled = true)
-//    public static class SecurityConfig extends WebSecurityConfigurerAdapter {
-//        protected void configure(final HttpSecurity http) throws Exception {
-//            http.authorizeRequests()
-//                    .anyRequest().authenticated()
-//                    .and()
-//                    .oauth2ResourceServer().jwt();
-//        }
-//    }
 }

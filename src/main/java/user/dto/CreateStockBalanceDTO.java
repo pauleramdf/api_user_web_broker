@@ -36,7 +36,7 @@ public class CreateStockBalanceDTO {
 
 
     public UserStockBalances transformaDTO(User user) {
-        UserStockBalances u = new UserStockBalances(new UserStockBalancesId(user, id_stock), stock_symbol, stock_name, Long.valueOf(0), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
+        UserStockBalances u = new UserStockBalances(new UserStockBalancesId(user, id_stock), stock_symbol, stock_name, Long.valueOf(volume), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
         return u;
     }
 

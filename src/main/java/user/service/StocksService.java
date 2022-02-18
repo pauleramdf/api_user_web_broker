@@ -43,23 +43,16 @@ public class StocksService {
     }
 
     public void updateAskBid(Long id_stock,String token) {
-
-        System.out.println("id da stock " +id_stock);
         MaxMinDTO bid = orderService.findMaxMinBuyOrders(id_stock);
         MaxMinDTO ask = orderService.findMaxMinSellOrders(id_stock);
 
-        System.out.println(bid.getMaxPrice() +"   "+ bid.getMinPrice());
-        System.out.println(ask.getMaxPrice() +"   "+ ask.getMinPrice());
-
         StockPricesDTO stockPrices = new StockPricesDTO();
         stockPrices.setId_stock(id_stock);
-        stockPrices.setAskMax(ask.getMaxPrice());
-        stockPrices.setAskMin(ask.getMinPrice());
-        stockPrices.setBidMax(bid.getMaxPrice());
-        stockPrices.setBidMin(bid.getMinPrice());
+        stockPrices.setAsk_max(ask.getMaxPrice());
+        stockPrices.setAsk_min(ask.getMinPrice());
+        stockPrices.setBid_max(bid.getMaxPrice());
+        stockPrices.setBid_min(bid.getMinPrice());
 
-//        System.out.println("ue "+ stockPrices.getMaxPrice() +"   "+ stockPrices.getMinPrice());
-//        System.out.println("ue "+stockPrices.getMaxPrice() +"   "+ stockPrices.getMinPrice());
         setAskBid(stockPrices, token);
     }
 }

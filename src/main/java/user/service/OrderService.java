@@ -1,15 +1,20 @@
 package user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import user.dto.FindAllOrdersByUserDTO;
 import user.dto.MaxMinDTO;
+import user.dto.userOrders.UserOrdersDto;
 import user.model.User;
 import user.model.UserOrders;
 import user.repository.UserOrdersRepository;
 import user.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service("orderService")
 public class OrderService {
@@ -69,5 +74,15 @@ public class OrderService {
         User user = userRepository.findByName(username).orElseThrow();
         List<FindAllOrdersByUserDTO> list = ordersRepository.FindAllOrdersByUser(user.getId()).stream().map( (u) -> new FindAllOrdersByUserDTO(u)).toList();
         return list;
+    }
+
+    public Optional<UserOrders> findById(Long id) {
+        return ordersRepository.findById(id);
+    }
+
+    public Page<UserOrdersDto> findUserOrders(Pageable pageable, String username) {
+        User user = userRepository.findByName(username).orElseThrow();
+        Page<UserOrders> ordersPage = ordersRepository.findAllPaged(pageable, user.getId());
+        return ordersPage.map(order -> new UserOrdersDto(order));
     }
 }

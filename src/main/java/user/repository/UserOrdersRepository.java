@@ -1,5 +1,7 @@
 package user.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +14,9 @@ import java.util.Optional;
 
 @Repository
 public interface UserOrdersRepository extends JpaRepository<UserOrders, Long> {
+
+    @Query("select c from UserOrders c where c.user.id = :id_user")
+    Page<UserOrders> findAllPaged(Pageable pageable, @Param("id_user") Long id);
 
     @Query(nativeQuery = true, value="""
     SELECT * FROM user_orders o 

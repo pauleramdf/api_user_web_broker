@@ -1,4 +1,4 @@
-package user.dto;
+package user.dto.userOrders;
 
 import lombok.Getter;
 import lombok.Setter;
