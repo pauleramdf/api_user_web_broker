@@ -23,8 +23,10 @@ public class Application {
 
     @Bean
     public WebClient webClient(WebClient.Builder builder){
+//        .baseUrl("http://apistocks:8083") to docker;
+//        .baseUrl("http://localhost:8083") to localhost
         return  builder
-                .baseUrl("http://apistocks:8083")
+                .baseUrl("http://localhost:8083")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

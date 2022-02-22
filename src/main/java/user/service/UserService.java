@@ -45,3 +45,7 @@ public class UserService {
         return userRepository.findAll();
     }
 }
+
+//criar uma nova table que representa o relacionamento da tabela de ordens com ela mesma
+//tem uma chave estrangeira/primaria que é o id da ordem
+//

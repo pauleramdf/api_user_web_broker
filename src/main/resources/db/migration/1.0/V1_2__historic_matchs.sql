@@ -1,0 +1,2 @@
+CREATE TABLE USER_ORDERS_MATCHS ( id_sell_order BIGINT NOT NULL REFERENCES user_orders(id), id_buy_order BIGINT NOT NULL REFERENCES user_orders(id),
+CONSTRAINT pk_RecommendedBooks PRIMARY KEY (id_sell_order, id_buy_order))

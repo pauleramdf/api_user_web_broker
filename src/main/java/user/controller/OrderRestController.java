@@ -13,10 +13,8 @@ import user.dto.PageDto;
 import user.dto.userOrders.CreateOrdersDTO;
 import user.dto.MaxMinDTO;
 import user.dto.userOrders.UserOrdersDto;
-import user.model.User;
-import user.model.UserOrders;
-import user.model.UserStockBalances;
-import user.model.UserStockBalancesId;
+import user.model.*;
+import user.repository.UserOrdersMatchsRepository;
 import user.service.OrderService;
 import user.service.StockBalanceService;
 import user.service.StocksService;
@@ -41,6 +39,9 @@ public class OrderRestController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserOrdersMatchsRepository matchsRepository;
 
     @PostMapping("/order")
     public ResponseEntity<UserOrders> createOrder( @RequestBody @Valid CreateOrdersDTO order, @RequestHeader("Authorization") String token) {
@@ -107,6 +108,8 @@ public class OrderRestController {
                 //checa se essa ordem tem preço compativel com a ordem de venda
                 if (o.getRemainingVolume() <= order.getRemainingVolume()) {
 
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order,o));
+                    matchsRepository.save(historic);
                     //subtrai o volume da ordem de venda
                     orderService.subVolume(order, o.getRemainingVolume());
 
@@ -120,8 +123,13 @@ public class OrderRestController {
 
                     orderService.subVolume(o, o.getRemainingVolume());
 
+
+
                 }
                 if (o.getRemainingVolume() >= order.getRemainingVolume() ) {
+
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order,o));
+                    matchsRepository.save(historic);
 
                     //atualiza o volume restante na ordem de compra
                     orderService.subVolume(o, order.getRemainingVolume());
@@ -163,6 +171,8 @@ public class OrderRestController {
                 }
                 //checa se essa ordem tem preço compativel com a ordem de compra
                 if (o.getRemainingVolume() <= order.getRemainingVolume()) {
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o,order));
+                    matchsRepository.save(historic);
 
                     //subtrai da stockBalance o user atual
                     stockBalanceService.addVolumeWallet(wallet, o.getRemainingVolume());
@@ -173,6 +183,9 @@ public class OrderRestController {
                     orderService.subVolume(o, o.getRemainingVolume());
                 }
                 if ( o.getRemainingVolume() >= order.getRemainingVolume()) {
+
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o,order));
+                    matchsRepository.save(historic);
 
                     //atualiza o volume restante na ordem de compra
                     orderService.subVolume(o, order.getRemainingVolume());
@@ -213,10 +226,8 @@ public class OrderRestController {
         //cancela a ordem de Compra/Venda
         //resititui o volume ou dollar balance que ainda não foi utilizado
 
-        System.out.println("ate aqui foi");
         User user = userService.findByName(orderdto.getUser_name()).orElseThrow();
         UserOrders order = orderService.findById(orderdto.getId()).orElseThrow();
-        System.out.println("ate aqui foi");
 
         if(order.getStatus() == 1){
             orderService.disable(order);
@@ -245,4 +256,15 @@ public class OrderRestController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/order/matchs/buy/{id}")
+    public ResponseEntity<?> gethistoryBuy(@PathVariable(value = "id") Long orderId){
+        return new ResponseEntity<>(matchsRepository.getMatchBuyHistory(orderId), HttpStatus.OK);
+    }
+
+    @GetMapping("/order/matchs/sell/{id}")
+    public ResponseEntity<?> gethistorySell(@PathVariable(value = "id") Long orderId){
+        return new ResponseEntity<>(matchsRepository.getMatchSellHistory(orderId), HttpStatus.OK);
+    }
+
 }
