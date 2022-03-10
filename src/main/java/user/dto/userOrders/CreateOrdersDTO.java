@@ -12,8 +12,6 @@ import javax.validation.constraints.*;
 @Setter
 public class CreateOrdersDTO {
 
-    @NotBlank
-    private String username;
     @Min(1)
     @NotNull
     private Long id_stock;

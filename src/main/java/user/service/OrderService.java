@@ -3,12 +3,16 @@ package user.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import user.dto.FindAllOrdersByUserDTO;
-import user.dto.MaxMinDTO;
+import user.dto.userOrders.FindAllOrdersByUserDTO;
+import user.dto.stocks.StockPricesDTO;
+import user.dto.userOrders.CreateOrdersDTO;
+import user.dto.userOrders.MaxMinDto;
 import user.dto.userOrders.UserOrdersDto;
-import user.model.User;
-import user.model.UserOrders;
+import user.model.*;
+import user.repository.UserOrdersMatchsRepository;
 import user.repository.UserOrdersRepository;
 import user.repository.UserRepository;
 
@@ -23,6 +27,18 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private StockBalanceService stockBalanceService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private StocksService stocksService;
+
+    @Autowired
+    private UserOrdersMatchsRepository matchsRepository;
+
     public List<UserOrders> findAllBuyOrders(Long stock_name, Double price){
         return ordersRepository.findAllBuyOrders(stock_name, price);
     }
@@ -31,13 +47,7 @@ public class OrderService {
         return ordersRepository.findAllSellOrders(stock_name, price);
     }
 
-    public MaxMinDTO findMaxMinSellOrders(Long stock){
-        return ordersRepository.findMaxMinSellOrders(stock).orElse(new MaxMinDTO(Double.valueOf(0),Double.valueOf(0)));
-    }
 
-    public MaxMinDTO findMaxMinBuyOrders(Long stock){
-        return ordersRepository.findMaxMinBuyOrders(stock).orElse(new MaxMinDTO(null,null));
-    }
 
     public void updateAllStatus(){
         List<UserOrders> orders = ordersRepository.findAllActive();
@@ -84,4 +94,180 @@ public class OrderService {
         Page<UserOrders> ordersPage = ordersRepository.findAllPaged(pageable, user.getId());
         return ordersPage.map(order -> new UserOrdersDto(order));
     }
+
+    public UserOrders cancelOrder(UserOrders order, User user){
+
+            this.disable(order);
+            if(order.getType() == 1){
+                //restituii sotckbalance
+                UserStockBalances wallet = stockBalanceService.findWallet( new UserStockBalancesId(user, order.getId_stock())).orElseThrow();
+                stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
+            }
+            else{
+                //restitui o dinheiro
+                Double restituicao = order.getRemainingVolume() * order.getPrice();
+                userService.addDollarBalance(user, restituicao);
+
+            }
+            return order;
+    }
+
+    public void validateTransaction(User user, CreateOrdersDTO order) {
+
+
+        if(order.getType() == 1 ){
+            UserStockBalances wallet =  stockBalanceService.findWallet(new UserStockBalancesId(user, order.getId_stock())).orElseThrow();
+            if(wallet.getVolume() < order.getVolume()){
+                //invalid
+                throw new RuntimeException();
+            }
+            stockBalanceService.subVolumeWallet(wallet, order.getVolume());
+        }
+        else{
+            if (user.getDollar_balance() < order.getPrice()*order.getVolume()) {
+                //invalid
+                throw new RuntimeException();
+            }
+            userService.subDollarBalance(user, order.getPrice()*order.getVolume());
+        }
+        return;
+    }
+
+    public ResponseEntity<UserOrders> buyDomain(User user, UserOrders order, UserStockBalances wallet, String token){
+        //encontra todas as ordens abertas de compra para essa mesma stock
+        List<UserOrders> orders = this.findAllSellOrders(order.getId_stock(), order.getPrice());
+        this.save(order);
+
+        this.updateAskBid(order.getId_stock(), token);
+        //caso nao existam ordens de compra abertas para essa stock a ordem é salva.
+        if (orders.isEmpty()) {
+            stockBalanceService.save(wallet);
+            return new ResponseEntity<>(order, HttpStatus.CREATED);
+        } else {
+            for (UserOrders o : orders) {
+                //caso não reste volume a venda a ordem é desativada
+                if (order.getRemainingVolume() == Long.valueOf(0)) {
+                    //atualiza o status da ordem para inativa
+                    break;
+                }
+                //checa se essa ordem tem preço compativel com a ordem de compra
+                if (o.getRemainingVolume() <= order.getRemainingVolume()) {
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o,order));
+                    matchsRepository.save(historic);
+
+                    //subtrai da stockBalance o user atual
+                    stockBalanceService.addVolumeWallet(wallet, o.getRemainingVolume());
+                    this.subVolume(order, o.getRemainingVolume());
+
+                    //debita o valor na carteira do user dono da ordem de compra
+                    userService.addDollarBalance(o.getUser(), order.getPrice() * o.getRemainingVolume());
+                    this.subVolume(o, o.getRemainingVolume());
+                }
+                if ( o.getRemainingVolume() >= order.getRemainingVolume()) {
+
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o,order));
+                    matchsRepository.save(historic);
+
+                    //atualiza o volume restante na ordem de compra
+                    this.subVolume(o, order.getRemainingVolume());
+                    //debita o volume na stockWallet do user dono da ordem de venda
+                    stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
+
+                    //debita o valor na carteira do user dono da ordem de compra
+                    userService.addDollarBalance(o.getUser(), order.getPrice()* order.getRemainingVolume());
+
+                    //atualiza o volume restante na ordem de venda
+                    this.subVolume( order, order.getRemainingVolume());
+                }
+            }
+        }
+
+        this.updateAllStatus();
+        this.updateAskBid(order.getId_stock(), token);
+        return new ResponseEntity<>(order, HttpStatus.CREATED);
+    }
+
+    private void updateAskBid(Long id_stock, String token) {
+
+        MaxMinDto bid = this.findMaxMinOrders(id_stock, 0);
+        MaxMinDto ask = this.findMaxMinOrders(id_stock, 1);
+
+        StockPricesDTO stockPrices = new StockPricesDTO();
+        stockPrices.setId_stock(id_stock);
+        stockPrices.setAsk_max(ask.getMaxPrice());
+        stockPrices.setAsk_min(ask.getMinPrice());
+        stockPrices.setBid_max(bid.getMaxPrice());
+        stockPrices.setBid_min(bid.getMinPrice());
+
+        stocksService.updateAskBid(stockPrices, token);
+    }
+    public MaxMinDto findMaxMinOrders(Long stock, Integer type){
+        return ordersRepository.findMaxMinOrders(stock, type).orElse(new MaxMinDto(null,null));
+    }
+
+    public ResponseEntity<UserOrders> sellDomain(User user, UserOrders order, UserStockBalances wallet, String token){
+
+        //encontra todas as ordens abertas de compra para essa mesma stock
+        List<UserOrders> orders = this.findAllBuyOrders(order.getId_stock(), order.getPrice());
+        this.save(order);
+        this.updateAskBid(order.getId_stock(), token);
+
+        //caso nao existam ordens de compra abertas para essa stock a ordem é salva.
+        if (orders.isEmpty()) {
+            return new ResponseEntity<>(order, HttpStatus.CREATED);
+        } else {
+            for (UserOrders o : orders) {
+                if (order.getRemainingVolume() == Long.valueOf(0)) {
+                    //atualiza o status da ordem para inativa
+                    break;
+                }
+                //checa se essa ordem tem preço compativel com a ordem de venda
+                if (o.getRemainingVolume() <= order.getRemainingVolume()) {
+
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order,o));
+                    matchsRepository.save(historic);
+                    //subtrai o volume da ordem de venda
+                    this.subVolume(order, o.getRemainingVolume());
+
+                    //credita o valor na carteira
+                    userService.addDollarBalance(user, o.getPrice()* o.getRemainingVolume());
+
+                    //acha a carteida do user dono da ordem de compra
+                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElseThrow();
+                    //acrescenta na stockBalance do user dono da ordem de compra
+                    stockBalanceService.addVolumeWallet(newWallet, o.getRemainingVolume());
+
+                    this.subVolume(o, o.getRemainingVolume());
+
+
+
+                }
+                if (o.getRemainingVolume() >= order.getRemainingVolume() ) {
+
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order,o));
+                    matchsRepository.save(historic);
+
+                    //atualiza o volume restante na ordem de compra
+                    this.subVolume(o, order.getRemainingVolume());
+
+                    //credita o valor na carteira do user dono da ordem de venda
+                    userService.addDollarBalance(user, o.getPrice()* order.getRemainingVolume());
+
+                    //acha a carteida do user dono da ordem de compra
+                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getId_stock())).orElseThrow();
+                    //acrescenta na stockBalance do user dono da ordem de compra
+                    stockBalanceService.subVolumeWallet(newWallet, order.getRemainingVolume());
+
+                    //atualiza o volume restante na ordem de venda
+                    this.subVolume(order, order.getRemainingVolume());
+                }
+                //caso não reste volume a venda a ordem é desativada
+            }
+        }
+        this.updateAllStatus();
+        this.updateAskBid(order.getId_stock(), token);
+        return new ResponseEntity<>(order, HttpStatus.CREATED);
+    }
+
+
 }

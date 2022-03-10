@@ -12,6 +12,8 @@ import java.sql.Timestamp;
 @Data
 public class UserOrdersDto {
     @NotNull
+    private Long id;
+    @NotNull
     private Integer type;
     @NotNull
     private Integer status;
@@ -41,6 +43,7 @@ public class UserOrdersDto {
     private Timestamp updated_on;
 
     public UserOrdersDto (UserOrders orders){
+        this.id = orders.getId();
         this.username = orders.getUser().getUsername();
         this.id_stock = orders.getId_stock();
         this.stock_symbol = orders.getStock_symbol();

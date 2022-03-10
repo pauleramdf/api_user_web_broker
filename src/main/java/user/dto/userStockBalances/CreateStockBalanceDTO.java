@@ -1,4 +1,4 @@
-package user.dto;
+package user.dto.userStockBalances;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package user.dto;
+package user.dto.userOrders;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CancelOrdersDTO {
     private Long id;
-    private String user_name;
     private Long id_stock;
     private int type;
 }

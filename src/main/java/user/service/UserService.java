@@ -3,9 +3,11 @@ package user.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import user.dto.user.UserResponseDTO;
 import user.model.User;
 import user.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,8 +43,14 @@ public class UserService {
 //        webClient.post().uri("/v1/token").body(credentialsDTO);
     }
 
-    public List<User> findAll() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> findAll() {
+        List<UserResponseDTO> ls = new ArrayList<>();
+        List<User> list = userRepository.findAll();
+        for (User user: list
+        ) {
+            ls.add(new UserResponseDTO(user));
+        }
+        return ls;
     }
 }
 

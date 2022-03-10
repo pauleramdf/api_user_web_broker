@@ -5,15 +5,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import user.dto.CreateStockBalanceDTO;
-import user.dto.FindAllByUserDTO;
-import user.dto.GetStockBalancesDTO;
+import user.dto.userStockBalances.CreateStockBalanceDTO;
+import user.dto.userStockBalances.FindAllByUserDTO;
 import user.model.User;
 import user.model.UserStockBalances;
 import user.repository.UserRepository;
 import user.service.StockBalanceService;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -28,18 +28,19 @@ public class StockBalancesRestController {
     @Autowired
     private StockBalanceService stockBalanceService;
 
-    @PostMapping("stockbalances/")
-    public ResponseEntity<?> getStockBalances(@Valid @RequestBody() GetStockBalancesDTO stockBalancesDTO){
-        User user = userRepository.findByName(stockBalancesDTO.getUsername()).orElseThrow();
-        List<FindAllByUserDTO> wallet =  stockBalanceService.findAllByUser(user.getId());
+    @GetMapping("/stockbalances")
+    public ResponseEntity<?> getStockBalances(Principal user){
+
+        User owner = userRepository.findByName(user.getName()).orElseThrow();
+        List<FindAllByUserDTO> wallet =  stockBalanceService.findAllByUser(owner.getId());
         return new ResponseEntity<>(wallet, HttpStatus.OK);
     }
 
-    @PostMapping("/create/balance")
-    public ResponseEntity<UserStockBalances> createStockBalance(@Valid @RequestBody CreateStockBalanceDTO stockBalance){
+    @PostMapping("/stockbalances/create")
+    public ResponseEntity<UserStockBalances> createStockBalance(@Valid @RequestBody CreateStockBalanceDTO stockBalance, Principal user){
 
-        User user = userRepository.findByName(stockBalance.getUsername()).orElseThrow();
-        UserStockBalances wallet =  stockBalanceService.save(stockBalance.transformaDTO(user));
+        User owner = userRepository.findByName(user.getName()).orElseThrow();
+        UserStockBalances wallet =  stockBalanceService.save(stockBalance.transformaDTO(owner));
         return new ResponseEntity<>(wallet, HttpStatus.CREATED);
     }
 }

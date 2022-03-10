@@ -21,6 +21,7 @@ public class Application {
         SpringApplication.run(Application.class, args);
     }
 
+
     @Bean
     public WebClient webClient(WebClient.Builder builder){
 //        .baseUrl("http://apistocks:8083") to docker;

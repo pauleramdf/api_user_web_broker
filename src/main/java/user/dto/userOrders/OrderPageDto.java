@@ -1,11 +1,10 @@
-package user.dto;
+package user.dto.userOrders;
 
 import lombok.Data;
 
 @Data
-public class PageDto {
+public class OrderPageDto {
 
-    private String username;
     private Integer page;
     private Integer totalPages;
     private Integer size;
