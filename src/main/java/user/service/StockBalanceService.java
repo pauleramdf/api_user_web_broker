@@ -2,7 +2,7 @@ package user.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import user.dto.userStockBalances.FindAllByUserDTO;
+import user.dto.userstockbalances.FindAllByUserDTO;
 import user.model.UserStockBalances;
 import user.model.UserStockBalancesId;
 import user.repository.UserStockBalancesRepository;
