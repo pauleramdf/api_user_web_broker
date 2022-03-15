@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 @Setter
 @AllArgsConstructor
 public class StockDTO {
-    private Long Id;
+    private Long id;
     private String stockSymbol;
     private String stockName;
     private BigDecimal askMin;
@@ -22,5 +22,6 @@ public class StockDTO {
     private Timestamp updated;
 
     public StockDTO(){
+        //construtor vazio
     }
 }

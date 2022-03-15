@@ -24,8 +24,8 @@ public class Application {
 
     @Bean
     public WebClient webClient(WebClient.Builder builder){
-//        .baseUrl("http://apistocks:8083") to docker;
-//        .baseUrl("http://localhost:8083") to localhost
+        // quando for no docker "http://apistocks:8083"
+        //quando nao for no docker "http://localhost:8083"
         return  builder
                 .baseUrl("http://localhost:8083")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
