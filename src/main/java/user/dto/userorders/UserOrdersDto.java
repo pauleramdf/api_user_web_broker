@@ -1,7 +1,6 @@
-package user.dto.userOrders;
+package user.dto.userorders;
 
 import lombok.Data;
-import user.model.User;
 import user.model.UserOrders;
 
 import javax.validation.constraints.Min;

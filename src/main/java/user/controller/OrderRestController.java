@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import user.dto.userOrders.*;
+import user.dto.userorders.*;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
 import user.service.OrderService;
@@ -59,7 +59,6 @@ public class OrderRestController {
             return orderService.buyDomain(createdOrder, wallet, token);
         }}
         catch (Exception e){
-            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
     }

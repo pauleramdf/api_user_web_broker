@@ -1,4 +1,4 @@
-package user.dto.userOrders;
+package user.dto.userorders;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

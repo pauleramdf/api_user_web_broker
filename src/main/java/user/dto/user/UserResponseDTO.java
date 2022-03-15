@@ -18,13 +18,13 @@ public class UserResponseDTO {
     private Timestamp created;
     private Timestamp updated;
 
-    public UserResponseDTO(Long id, String username, Double dollar_balance, boolean enabled, Timestamp created_on, Timestamp updated_on) {
+    public UserResponseDTO(Long id, String username, Double dollarBalance, boolean enabled, Timestamp created, Timestamp updated) {
         this.id = id;
         this.username = username;
-        this.dollarBalance = dollar_balance;
+        this.dollarBalance = dollarBalance;
         this.enabled = enabled;
-        this.created = created_on;
-        this.updated = updated_on;
+        this.created = created;
+        this.updated = updated;
     }
 
     public UserResponseDTO(User user) {

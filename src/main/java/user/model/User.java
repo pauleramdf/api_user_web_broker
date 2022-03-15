@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.*;
@@ -13,7 +14,9 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name="users")
-public class User {
+public class User implements Serializable {
+    private static final long SERIALVERSIONUID = 1L;
+
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;

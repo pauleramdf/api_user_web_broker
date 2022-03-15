@@ -1,4 +1,4 @@
-package user.dto.userStockBalances;
+package user.dto.userstockbalances;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,8 +36,7 @@ public class CreateStockBalanceDTO {
 
 
     public UserStockBalances transformaDTO(User user) {
-        UserStockBalances u = new UserStockBalances(new UserStockBalancesId(user, idStock), stockSymbol, stockName, Long.valueOf(volume), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
-        return u;
+        return new UserStockBalances(new UserStockBalancesId(user, idStock), stockSymbol, stockName, volume, Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
     }
 
 }

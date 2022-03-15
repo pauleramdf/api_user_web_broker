@@ -16,10 +16,10 @@ public class CreateUserDTO {
     private String password;
     @Min(0)
     @NotNull
-    private Double dollar_balance;
+    private Double dollarBalance;
 
     public User transformaDTO(){
-        return new User(username, password, dollar_balance);
+        return new User(username, password, dollarBalance);
     }
 }
 
