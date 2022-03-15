@@ -8,10 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import user.dto.userOrders.CancelOrdersDTO;
-import user.dto.userOrders.CreateOrdersDTO;
-import user.dto.userOrders.OrderPageDto;
-import user.dto.userOrders.UserOrdersDto;
+import user.dto.userOrders.*;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
 import user.service.OrderService;
@@ -20,6 +17,7 @@ import user.service.UserService;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @CrossOrigin
@@ -40,7 +38,7 @@ public class OrderRestController {
 
     @PostMapping("/order")
     public ResponseEntity<UserOrders> createOrder( @RequestBody @Valid CreateOrdersDTO order, @RequestHeader("Authorization") String token, Principal userJWT) {
-
+        try{
         //checa se o user existe de fato
         User user = userService.findByName(userJWT.getName()).orElseThrow(Error::new);
         //valida a transação
@@ -51,24 +49,28 @@ public class OrderRestController {
 
         //pega a carteira existente ou caso não exista cria uma zerada
         UserStockBalances wallet
-                = stockBalanceService.findById(new UserStockBalancesId(user, order.getId_stock())).orElse(new UserStockBalances(new UserStockBalancesId(user, order.getId_stock()), order.getStock_symbol(), order.getStock_name(),0L));
+                = stockBalanceService.findById(new UserStockBalancesId(user, order.getIdStock())).orElse(new UserStockBalances(new UserStockBalancesId(user, order.getIdStock()), order.getStockSymbol(), order.getStockName(),0L));
 
         if (order.getType() == 1) {
-            return orderService.sellDomain(user, createdOrder, wallet, token);
+            return orderService.sellDomain(user, createdOrder, token);
         }
 
         else {
-            return orderService.buyDomain(user, createdOrder, wallet, token);
+            return orderService.buyDomain(createdOrder, wallet, token);
+        }}
+        catch (Exception e){
+            System.out.println(e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping("/order")
-    public ResponseEntity<?> getOrders(Principal userJWT){
-        return new ResponseEntity<>(orderService.FindAllOrdersByUser(userJWT.getName()), HttpStatus.OK);
+    public ResponseEntity<List<FindAllOrdersByUserDTO>> getOrders(Principal userJWT){
+        return new ResponseEntity<>(orderService.findAllOrdersByUser(userJWT.getName()), HttpStatus.OK);
     }
 
     @PostMapping("/order/cancel")
-    public ResponseEntity<?> cancelOrder(@Valid @RequestBody CancelOrdersDTO orderdto, Principal userJWT){
+    public ResponseEntity< UserOrders> cancelOrder(@Valid @RequestBody CancelOrdersDTO orderdto, Principal userJWT){
         //cancela a ordem de Compra/Venda
         //resititui o volume ou dollar balance que ainda não foi utilizado
 
@@ -95,12 +97,12 @@ public class OrderRestController {
     }
 
     @GetMapping("/order/matchs/buy/{id}")
-    public ResponseEntity<?> gethistoryBuy(@PathVariable(value = "id") Long orderId){
+    public ResponseEntity<List<UserOrdersMatchs> > gethistoryBuy(@PathVariable(value = "id") Long orderId){
         return new ResponseEntity<>(matchsRepository.getMatchBuyHistory(orderId), HttpStatus.OK);
     }
 
     @GetMapping("/order/matchs/sell/{id}")
-    public ResponseEntity<?> gethistorySell(@PathVariable(value = "id") Long orderId){
+    public ResponseEntity<List<UserOrdersMatchs> > gethistorySell(@PathVariable(value = "id") Long orderId){
         return new ResponseEntity<>(matchsRepository.getMatchSellHistory(orderId), HttpStatus.OK);
     }
 

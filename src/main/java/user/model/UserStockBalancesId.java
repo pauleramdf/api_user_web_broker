@@ -3,6 +3,7 @@ package user.model;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -13,19 +14,20 @@ import java.util.Objects;
 @Setter
 @Embeddable
 public class UserStockBalancesId implements Serializable {
-    private static final long serialversionUID = 1L;
+    private static final long SERIALVERSIONUID = 1L;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
-    private Long id_stock;
+    @Column(name = "id_stock")
+    private Long idStock;
 
     public UserStockBalancesId() {
     }
 
-    public UserStockBalancesId(User user, Long id_stock) {
+    public UserStockBalancesId(User user, Long idStock) {
         this.user = user;
-        this.id_stock = id_stock;
+        this.idStock = idStock;
     }
 
     @Override
@@ -39,11 +41,11 @@ public class UserStockBalancesId implements Serializable {
         }
 
         UserStockBalancesId y = (UserStockBalancesId) x;
-        return this.user == y.user && this.id_stock == y.id_stock;
+        return this.user == y.user && this.idStock == y.idStock;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(user, id_stock);
+        return Objects.hash(user, idStock);
     }
 }

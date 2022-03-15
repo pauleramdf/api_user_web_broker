@@ -24,14 +24,14 @@ public interface UserOrdersRepository extends JpaRepository<UserOrders, Long> {
     WHERE o.type = 0 AND o.status = 1 AND o.id_stock = :id_stock AND o.price >= :price AND o.remaining_volume > 0
     ORDER BY  o.created_on ASC
     """)
-    List<UserOrders> findAllBuyOrders(@Param("id_stock") Long id_stock, @Param("price") Double price);
+    List<UserOrders> findAllBuyOrders(@Param("id_stock") Long idStock, @Param("price") Double price);
 
     @Query(nativeQuery = true, value="""
     SELECT * FROM user_orders o 
     WHERE o.type = 1 AND o.status = 1 AND o.id_stock = :id_stock AND o.price <= :price  AND o.remaining_volume > 0
     ORDER BY  o.created_on ASC
      """)
-    List<UserOrders> findAllSellOrders(@Param("id_stock") Long id_stock, @Param("price") Double price);
+    List<UserOrders> findAllSellOrders(@Param("id_stock") Long idStock, @Param("price") Double price);
 
     @Query(nativeQuery = true, value = """
     SELECT * FROM user_orders o
@@ -42,9 +42,9 @@ public interface UserOrdersRepository extends JpaRepository<UserOrders, Long> {
     @Query(nativeQuery = true, value= """
     SELECT * FROM user_orders as uo where uo.id_user = :id
 """)
-    List<UserOrders> FindAllOrdersByUser(@Param("id") Long id);
+    List<UserOrders> findAllOrdersByUser(@Param("id") Long id);
 
-    @Query("SELECT new user.dto.userOrders.MaxMinDto(max(o.price),min(o.price)) FROM UserOrders o where o.type = :type AND o.status = 1 AND o.id_stock = :id_stock")
+    @Query("SELECT new user.dto.userOrders.MaxMinDto(max(o.price),min(o.price)) FROM UserOrders o where o.type = :type AND o.status = 1 AND o.idStock = :id_stock")
     Optional<MaxMinDto> findMaxMinOrders(@Param("id_stock") Long idStock, @Param("type") Integer type);
 
     @Query(nativeQuery = true, value= """
@@ -59,6 +59,6 @@ public interface UserOrdersRepository extends JpaRepository<UserOrders, Long> {
         ) AS bid 
         ON bid.id_stock = ask.id_stock
         """)
-    Optional<StockPricesDTO> findAskBid(@Param("id_stock") Long id_stock);
+    Optional<StockPricesDTO> findAskBid(@Param("id_stock") Long idStock);
 }
 

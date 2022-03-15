@@ -23,20 +23,20 @@ public class CreateStockBalanceDTO {
 
     @Min(1)
     @NotNull
-    private Long id_stock;
+    private Long idStock;
     @NotBlank
     private String username;
     @NotBlank
-    private String stock_symbol;
+    private String stockSymbol;
     @NotBlank
-    private String stock_name;
+    private String stockName;
     @Min(1)
     @NotNull
     private Long volume;
 
 
     public UserStockBalances transformaDTO(User user) {
-        UserStockBalances u = new UserStockBalances(new UserStockBalancesId(user, id_stock), stock_symbol, stock_name, Long.valueOf(volume), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
+        UserStockBalances u = new UserStockBalances(new UserStockBalancesId(user, idStock), stockSymbol, stockName, Long.valueOf(volume), Timestamp.valueOf(LocalDateTime.now()), Timestamp.valueOf(LocalDateTime.now()));
         return u;
     }
 

@@ -21,11 +21,11 @@ public class UserOrdersDto {
     private String username;
     @Min(1)
     @NotNull
-    private Long id_stock;
+    private Long idStock;
     @NotBlank
-    private String stock_name;
+    private String stockName;
     @NotBlank
-    private String stock_symbol;
+    private String stockSymbol;
     @Min(1)
     @NotNull
     private Long volume;
@@ -39,22 +39,22 @@ public class UserOrdersDto {
     @NotNull
     private Double totalPrice;
 
-    private Timestamp created_on;
-    private Timestamp updated_on;
+    private Timestamp created;
+    private Timestamp updated;
 
     public UserOrdersDto (UserOrders orders){
         this.id = orders.getId();
         this.username = orders.getUser().getUsername();
-        this.id_stock = orders.getId_stock();
-        this.stock_symbol = orders.getStock_symbol();
-        this.stock_name = orders.getStock_name();
+        this.idStock = orders.getIdStock();
+        this.stockSymbol = orders.getStockSymbol();
+        this.stockName = orders.getStockName();
         this.volume = orders.getVolume();
         this.price = orders.getPrice();
         this.totalPrice = orders.getTotalPrice();
         this.remainingVolume = orders.getRemainingVolume();
         this.type = orders.getType();
         this.status = orders.getStatus();
-        this.created_on = orders.getCreated_on();
-        this.updated_on = orders.getUpdated_on();
+        this.created = orders.getCreated();
+        this.updated = orders.getUpdated();
     }
 }

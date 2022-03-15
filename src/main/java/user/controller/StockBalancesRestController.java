@@ -29,7 +29,7 @@ public class StockBalancesRestController {
     private StockBalanceService stockBalanceService;
 
     @GetMapping("/stockbalances")
-    public ResponseEntity<?> getStockBalances(Principal user){
+    public ResponseEntity<List<FindAllByUserDTO>> getStockBalances(Principal user){
 
         User owner = userRepository.findByName(user.getName()).orElseThrow();
         List<FindAllByUserDTO> wallet =  stockBalanceService.findAllByUser(owner.getId());

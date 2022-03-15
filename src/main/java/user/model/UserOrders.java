@@ -7,33 +7,31 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @Entity
 @Table(name ="user_orders")
 public class UserOrders implements Serializable {
-    private static final long serialversionUID = 1L;
+    private static final long SERIALVERSIONUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
     private User user;
 
     @Column(name = "id_stock")
-    private Long id_stock;
+    private Long idStock;
 
     @Column(name = "stock_symbol")
-    private String stock_symbol;
+    private String stockSymbol;
 
     @Column(name = "stock_name")
-    private String stock_name;
+    private String stockName;
 
     @Column(name = "volume")
     private Long volume;
@@ -55,11 +53,11 @@ public class UserOrders implements Serializable {
 
     @CreationTimestamp
     @Column(name = "created_on")
-    private Timestamp created_on;
+    private Timestamp created;
 
     @UpdateTimestamp
     @Column(name = "updated_on")
-    private Timestamp updated_on;
+    private Timestamp updated;
 
     @PrePersist
     private void onCreate(){
@@ -67,18 +65,6 @@ public class UserOrders implements Serializable {
     }
 
     public UserOrders(){
-    }
-
-    public UserOrders(User user, Long id_stock, String stock_symbol, String stock_name, Long volume, Double price, Double totalPrice, Long remainingVolume, Integer type, Integer status) {
-        this.id_stock = id_stock;
-        this.user = user;
-        this.stock_symbol = stock_symbol;
-        this.stock_name = stock_name;
-        this.volume = volume;
-        this.price = price;
-        this.totalPrice = totalPrice;
-        this.remainingVolume = remainingVolume;
-        this.type = type;
-        this.status = status;
+        //construtor vazio
     }
 }

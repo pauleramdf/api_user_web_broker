@@ -6,37 +6,33 @@ import user.model.User;
 import user.model.UserStockBalances;
 import user.model.UserStockBalancesId;
 
-import javax.validation.constraints.NotBlank;
 import java.sql.Timestamp;
 
 @Getter
 @Setter
 public class WalletDTO {
 
-    private Long id_stock;
-    @NotBlank
-    private String username;
-    private String stock_symbol;
-    private String stock_name;
+    private Long idStock;
+    private String stockSymbol;
+    private String stockName;
     private Long volume;
-    private Timestamp created_on;
-    private Timestamp updated_on;
+    private Timestamp created;
+    private Timestamp updated;
 
     public WalletDTO(){}
 
-    public WalletDTO(String username,Long id_stock, String stock_symbol, String stock_name, Long volume, Timestamp created_on, Timestamp updated_on) {
+    public WalletDTO(Long idStock, String stockSymbol, String stockName, Long volume, Timestamp created, Timestamp updated) {
 
-        this.username = username;
-        this.id_stock = id_stock;
-        this.stock_symbol = stock_symbol;
-        this.stock_name = stock_name;
+        this.idStock = idStock;
+        this.stockSymbol = stockSymbol;
+        this.stockName = stockName;
         this.volume = volume;
-        this.created_on = created_on;
-        this.updated_on = updated_on;
+        this.created = created;
+        this.updated = updated;
     }
 
     public UserStockBalances transformaObjeto(User user){
-        return new UserStockBalances( new UserStockBalancesId(user, id_stock),  stock_symbol,  stock_name,  volume);
+        return new UserStockBalances( new UserStockBalancesId(user, idStock),  stockSymbol,  stockName,  volume);
     }
 
 

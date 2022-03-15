@@ -1,7 +1,5 @@
 package user.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,8 +13,6 @@ import java.util.List;
 public interface UserStockBalancesRepository extends JpaRepository<UserStockBalances, UserStockBalancesId>{
 
     @Query(nativeQuery = true, value = "SELECT * from user_stock_balances as usb where usb.id_user = :id_user")
-    List<UserStockBalances> findAllByUser(@Param("id_user") Long id_user);
+    List<UserStockBalances> findAllByUser(@Param("id_user") Long idUser);
 
-//    @Query(value = "SELECT new user.model.UserStockBalances(usb.id_stock, usb.user, usb.stock_symbol, usb.stock_name, usb.volume,usb.enabled ) from UserStockBalances as usb where usb.user.id = :id_user and usb.id_stock = :id_stock")
-//    Optional<UserStockBalances> find(@Param("id_user") Long id_user, @Param("id_stock") Long id_stock);
 }

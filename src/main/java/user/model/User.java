@@ -2,13 +2,10 @@ package user.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
@@ -16,9 +13,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table(name="users")
-public class User implements Serializable {
-    private static final long serialversionUID = 1L;
-
+public class User {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
@@ -30,17 +25,17 @@ public class User implements Serializable {
     private String password;
 
     @Column(name = "dollar_balance", nullable = false)
-    private Double dollar_balance;
+    private Double dollarBalance;
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
     @CreationTimestamp
     @Column(name = "created_on")
-    private Timestamp created_on;
+    private Timestamp created;
     @UpdateTimestamp
     @Column(name = "updated_on")
-    private Timestamp updated_on;
+    private Timestamp updated;
 
     @PrePersist
     private void onCreate(){
@@ -50,9 +45,9 @@ public class User implements Serializable {
     public User(){
     }
 
-    public User(String username, String password, Double dollar_balance) {
+    public User(String username, String password, Double dollarBalance) {
         this.username = username;
         this.password = password;
-        this.dollar_balance = dollar_balance;
+        this.dollarBalance = dollarBalance;
     }
 }

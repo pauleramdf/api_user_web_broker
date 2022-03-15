@@ -1,25 +1,23 @@
 package user.dto.stocks;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Data
 @NoArgsConstructor
 public class StockPricesDTO {
 
-    private Long id_stock;
-    private Double ask_min;
-    private Double ask_max;
-    private Double bid_min;
-    private Double bid_max;
+    private Long idStock;
+    private Double askMin;
+    private Double askMax;
+    private Double bidMin;
+    private Double bidMax;
 
-    public StockPricesDTO(Long id_stock, Double ask_min, Double ask_max, Double bid_min, Double bid_max) {
-        this.id_stock = id_stock;
-        this.ask_min = ask_min;
-        this.ask_max = ask_max;
-        this.bid_min = bid_min;
-        this.bid_max = bid_max;
+    public StockPricesDTO(Long idStock, Double askMin, Double askMax, Double bidMin, Double bidMax) {
+        this.idStock = idStock;
+        this.askMin = askMin;
+        this.askMax = askMax;
+        this.bidMin = bidMin;
+        this.bidMax = bidMax;
     }
 }

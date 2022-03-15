@@ -1,11 +1,8 @@
 package user.config;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Getter

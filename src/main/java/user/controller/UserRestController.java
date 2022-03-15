@@ -6,13 +6,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import user.dto.user.CreateUserDTO;
-import user.dto.stocks.StockDTO;
 import user.dto.user.UserResponseDTO;
 import user.model.User;
-import user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import user.service.StocksService;
 import user.service.UserService;
 
 import javax.validation.Valid;
@@ -27,20 +24,14 @@ class UserRestController {
     @Autowired
     private UserService userService;
 
-//    @GetMapping(value = "/stocks/{id}", produces = "application/json")
-//    public ResponseEntity<?> getStocks(@Valid @PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
-//        StockDTO stock = stocksService.getStock(id, token);
-//        return new ResponseEntity<>(stock, HttpStatus.OK);
-//    }
-
     @GetMapping(value = "/user/{id}", produces = "application/json")
-    public ResponseEntity<?> getUser( @Valid @PathVariable(value = "id") Long user_id, Principal principal) {
-        UserResponseDTO u = new UserResponseDTO(userService.findById(user_id).orElseThrow());
+    public ResponseEntity<UserResponseDTO> getUser( @Valid @PathVariable(value = "id") Long userId, Principal principal) {
+        UserResponseDTO u = new UserResponseDTO(userService.findById(userId).orElseThrow());
         return new ResponseEntity<>(u, HttpStatus.OK);
     }
 
     @GetMapping(value = "/user", produces = "application/json")
-    public ResponseEntity<?>  getUsers() {
+    public ResponseEntity<List<UserResponseDTO>>  getUsers() {
         try{
             List<UserResponseDTO> users = userService.findAll();
 
@@ -52,16 +43,16 @@ class UserRestController {
     }
 
     @PatchMapping(value = "/user/disable/{id}", produces = "application/json")
-    public ResponseEntity<?>  DisableUser(@Valid @PathVariable(value = "id") Long user_id, Principal principal) {
+    public ResponseEntity<UserResponseDTO> disableUser(@Valid @PathVariable(value = "id") Long userId, Principal principal) {
 
-        User user = userService.findById(user_id).orElseThrow();
+        User user = userService.findById(userId).orElseThrow();
         user.setEnabled(false);
         UserResponseDTO u = new UserResponseDTO(userService.save(user));
         return new ResponseEntity<>(u,HttpStatus.OK );
     }
 
     @PostMapping(value = "/user", produces = "application/json")
-    public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserDTO userDTO, Principal principal) {
+    public ResponseEntity<User> createUser(@RequestBody @Valid CreateUserDTO userDTO, Principal principal) {
         User user = userDTO.transformaDTO();
         return new ResponseEntity<>(userService.save(user), HttpStatus.CREATED);
     }

@@ -22,12 +22,12 @@ public class UserService {
         return userRepository.findById(id);
     }
     public void addDollarBalance(User user, double value){
-        user.setDollar_balance(user.getDollar_balance() + value);
+        user.setDollarBalance(user.getDollarBalance() + value);
         userRepository.save(user);
     }
 
     public void subDollarBalance(User user, double value){
-        user.setDollar_balance(user.getDollar_balance() - value);
+        user.setDollarBalance(user.getDollarBalance() - value);
         userRepository.save(user);
     }
 
@@ -38,10 +38,7 @@ public class UserService {
     public User save(User user){
         return userRepository.save(user);
     }
-    public void getCrendentials() {
-//        CredentialsDTO credentialsDTO = new CredentialsDTO();
-//        webClient.post().uri("/v1/token").body(credentialsDTO);
-    }
+
 
     public List<UserResponseDTO> findAll() {
         List<UserResponseDTO> ls = new ArrayList<>();

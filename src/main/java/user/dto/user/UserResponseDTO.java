@@ -13,26 +13,26 @@ import java.sql.Timestamp;
 public class UserResponseDTO {
     private Long id;
     private String username;
-    private Double dollar_balance;
+    private Double dollarBalance;
     private boolean enabled;
-    private Timestamp created_on;
-    private Timestamp updated_on;
+    private Timestamp created;
+    private Timestamp updated;
 
     public UserResponseDTO(Long id, String username, Double dollar_balance, boolean enabled, Timestamp created_on, Timestamp updated_on) {
         this.id = id;
         this.username = username;
-        this.dollar_balance = dollar_balance;
+        this.dollarBalance = dollar_balance;
         this.enabled = enabled;
-        this.created_on = created_on;
-        this.updated_on = updated_on;
+        this.created = created_on;
+        this.updated = updated_on;
     }
 
     public UserResponseDTO(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
-        this.dollar_balance = user.getDollar_balance();
+        this.dollarBalance = user.getDollarBalance();
         this.enabled = user.isEnabled();
-        this.created_on = user.getCreated_on();
-        this.updated_on = user.getUpdated_on();
+        this.created = user.getCreated();
+        this.updated = user.getUpdated();
     }
 }

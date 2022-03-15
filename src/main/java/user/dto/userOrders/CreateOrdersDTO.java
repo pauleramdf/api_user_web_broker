@@ -14,11 +14,11 @@ public class CreateOrdersDTO {
 
     @Min(1)
     @NotNull
-    private Long id_stock;
+    private Long idStock;
     @NotBlank
-    private String stock_name;
+    private String stockName;
     @NotBlank
-    private String stock_symbol;
+    private String stockSymbol;
     @Min(1)
     @NotNull
     private Long volume;
@@ -27,10 +27,10 @@ public class CreateOrdersDTO {
     private Double price;
     @Min(1)
     @NotNull
-    private Long remaining_volume;
+    private Long remainingVolume;
     @Min(1)
     @NotNull
-    private Double total_price;
+    private Double totalPrice;
 
     @Min(0)
     @Max(1)
@@ -39,6 +39,17 @@ public class CreateOrdersDTO {
     private Integer type;
 
     public UserOrders transformaParaObjeto(User user){
-        return new UserOrders(user, id_stock, stock_symbol, stock_name, volume, price, total_price, remaining_volume, type, 1);
+        UserOrders order = new UserOrders();
+        order.setUser(user);
+        order.setIdStock(idStock);
+        order.setStockName(stockName);
+        order.setStockSymbol(stockSymbol);
+        order.setVolume(volume);
+        order.setPrice(price);
+        order.setTotalPrice(totalPrice);
+        order.setRemainingVolume(remainingVolume);
+        order.setType(type);
+        order.setStatus(1);
+        return order;
     }
 }

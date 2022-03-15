@@ -16,8 +16,6 @@ public class StockBalanceService {
     private UserStockBalancesRepository userStockBalancesRepository;
 
     public UserStockBalances save(UserStockBalances wallet){
-        System.out.println(wallet.getCreated_on());
-        System.out.println(wallet.getUpdated_on());
         return userStockBalancesRepository.save(wallet);
     }
 
@@ -40,7 +38,6 @@ public class StockBalanceService {
     }
 
     public List<FindAllByUserDTO> findAllByUser(Long id) {
-        List<FindAllByUserDTO> wallets = userStockBalancesRepository.findAllByUser(id).stream().map((wallet)-> new FindAllByUserDTO(wallet)).toList();
-        return wallets;
+        return userStockBalancesRepository.findAllByUser(id).stream().map(FindAllByUserDTO::new).toList();
     }
 }

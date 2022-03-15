@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CancelOrdersDTO {
     private Long id;
-    private Long id_stock;
+    private Long idStock;
     private int type;
 }
