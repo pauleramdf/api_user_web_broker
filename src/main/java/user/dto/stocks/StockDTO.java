@@ -18,8 +18,8 @@ public class StockDTO {
     private BigDecimal askMax;
     private BigDecimal bidMin;
     private BigDecimal bidMax;
-    private Timestamp created_on;
-    private Timestamp updated_on;
+    private Timestamp created;
+    private Timestamp updated;
 
     public StockDTO(){
     }

@@ -59,7 +59,6 @@ public class OrderRestController {
             return orderService.buyDomain(createdOrder, wallet, token);
         }}
         catch (Exception e){
-            System.out.println(e);
             return ResponseEntity.badRequest().build();
         }
     }
