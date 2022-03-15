@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import user.dto.stocks.StockPricesDTO;
-import user.dto.userOrders.MaxMinDto;
+import user.dto.userorders.MaxMinDto;
 import user.model.UserOrders;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public interface UserOrdersRepository extends JpaRepository<UserOrders, Long> {
 """)
     List<UserOrders> findAllOrdersByUser(@Param("id") Long id);
 
-    @Query("SELECT new user.dto.userOrders.MaxMinDto(max(o.price),min(o.price)) FROM UserOrders o where o.type = :type AND o.status = 1 AND o.idStock = :id_stock")
+    @Query("SELECT new user.dto.userorders.MaxMinDto(max(o.price),min(o.price)) FROM UserOrders o where o.type = :type AND o.status = 1 AND o.idStock = :id_stock")
     Optional<MaxMinDto> findMaxMinOrders(@Param("id_stock") Long idStock, @Param("type") Integer type);
 
     @Query(nativeQuery = true, value= """

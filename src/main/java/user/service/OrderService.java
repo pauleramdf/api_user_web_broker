@@ -7,11 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import user.config.InvalidOrderException;
-import user.dto.userOrders.FindAllOrdersByUserDTO;
+import user.dto.userorders.FindAllOrdersByUserDTO;
 import user.dto.stocks.StockPricesDTO;
-import user.dto.userOrders.CreateOrdersDTO;
-import user.dto.userOrders.MaxMinDto;
-import user.dto.userOrders.UserOrdersDto;
+import user.dto.userorders.CreateOrdersDTO;
+import user.dto.userorders.MaxMinDto;
+import user.dto.userorders.UserOrdersDto;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
 import user.repository.UserOrdersRepository;
@@ -82,7 +82,7 @@ public class OrderService {
 
     public List<FindAllOrdersByUserDTO> findAllOrdersByUser(String username) {
         User user = userRepository.findByName(username).orElseThrow();
-        return ordersRepository.findAllOrdersByUser(user.getId()).stream().map(u-> new FindAllOrdersByUserDTO(u)).toList();
+        return ordersRepository.findAllOrdersByUser(user.getId()).stream().map(FindAllOrdersByUserDTO::new).toList();
     }
 
     public Optional<UserOrders> findById(Long id) {
@@ -188,7 +188,6 @@ public class OrderService {
     }
 
     private void updateAskBid(Long idStock, String token) {
-        System.out.println(idStock);
         MaxMinDto bid = this.findMaxMinOrders(idStock, 0);
         MaxMinDto ask = this.findMaxMinOrders(idStock, 1);
 

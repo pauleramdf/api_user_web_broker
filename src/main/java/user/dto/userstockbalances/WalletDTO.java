@@ -1,4 +1,4 @@
-package user.dto.userStockBalances;
+package user.dto.userstockbalances;
 
 import lombok.Getter;
 import lombok.Setter;
