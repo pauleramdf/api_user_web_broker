@@ -1,22 +1,36 @@
 package user.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import user.dto.userstockbalances.FindAllByUserDTO;
+import user.dto.userstockbalances.CreateStockBalanceDTO;
+import user.dto.userstockbalances.WalletDTO;
+import user.model.User;
 import user.model.UserStockBalances;
 import user.model.UserStockBalancesId;
+import user.repository.UserRepository;
 import user.repository.UserStockBalancesRepository;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 @Service("stockBalanceService")
+@RequiredArgsConstructor
 public class StockBalanceService {
-    @Autowired
-    private UserStockBalancesRepository userStockBalancesRepository;
 
-    public UserStockBalances save(UserStockBalances wallet){
-        return userStockBalancesRepository.save(wallet);
+    private final UserStockBalancesRepository userStockBalancesRepository;
+
+    private final UserRepository userRepository;
+
+    public UserStockBalances create(CreateStockBalanceDTO stockBalance, Principal user){
+        User owner = userRepository.findByName(user.getName()).orElseThrow();
+        return userStockBalancesRepository.save(stockBalance.transformaDTO(owner));
+    }
+
+    public UserStockBalances save(UserStockBalances stockBalance){
+        return userStockBalancesRepository.save(stockBalance);
     }
 
     public Optional<UserStockBalances> findById(UserStockBalancesId id){
@@ -37,7 +51,15 @@ public class StockBalanceService {
         return userStockBalancesRepository.findById(id);
     }
 
-    public List<FindAllByUserDTO> findAllByUser(Long id) {
-        return userStockBalancesRepository.findAllByUser(id).stream().map(FindAllByUserDTO::new).toList();
+    public List<WalletDTO> findAllByUser(Principal user) {
+        User owner = userRepository.findByName(user.getName()).orElseThrow();
+        return userStockBalancesRepository.findAllByUser(owner.getId()).stream().map(WalletDTO::new).toList();
     }
+
+    public Page<WalletDTO> findAllByUserPage(Pageable pageable, Principal user) {
+        User owner = userRepository.findByName(user.getName()).orElseThrow();
+        Page<UserStockBalances> walletsPage = userStockBalancesRepository.findAllByUserPaged(pageable, owner.getId());
+        return walletsPage.map(WalletDTO::new);
+    }
+
 }

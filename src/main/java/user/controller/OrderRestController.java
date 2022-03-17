@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import user.dto.PageDto;
 import user.dto.userorders.*;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
@@ -86,7 +87,7 @@ public class OrderRestController {
     }
 
     @PostMapping("order/paged")
-    public ResponseEntity<Page<UserOrdersDto>> getPage(@RequestBody OrderPageDto page, Principal userJWT) {
+    public ResponseEntity<Page<UserOrdersDto>> getPage(@RequestBody PageDto page, Principal userJWT) {
         try {
             Pageable pageable = PageRequest.of(page.getPage(), page.getSize());
             return ResponseEntity.ok().body(orderService.findUserOrders(pageable, userJWT.getName()));

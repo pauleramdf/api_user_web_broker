@@ -13,7 +13,7 @@ services:
       DB_URL: jdbc:postgresql://database:5432/stock_users
     restart: always
   apistocks:
-    image: "api-stocks:v1"
+    image: "api_stocks:v1"
     ports:
       - 8083:8083
     environment:

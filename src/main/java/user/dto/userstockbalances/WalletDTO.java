@@ -31,6 +31,15 @@ public class WalletDTO {
         this.updated = updated;
     }
 
+    public WalletDTO(UserStockBalances wallet) {
+        this.idStock = wallet.getId().getIdStock();
+        this.stockSymbol = wallet.getStockSymbol();
+        this.stockName = wallet.getStockName();
+        this.volume = wallet.getVolume();
+        this.created = wallet.getCreated();
+        this.updated = wallet.getUpdated();
+    }
+
     public UserStockBalances transformaObjeto(User user){
         return new UserStockBalances( new UserStockBalancesId(user, idStock),  stockSymbol,  stockName,  volume);
     }
