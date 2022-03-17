@@ -20,7 +20,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8080")
 @ComponentScan("com.user.repository")
 @RequestMapping()
 public class StockBalancesRestController {

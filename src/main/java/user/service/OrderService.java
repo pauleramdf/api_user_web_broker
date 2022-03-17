@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import user.config.InvalidOrderException;
 import user.dto.userorders.FindAllOrdersByUserDTO;
 import user.dto.stocks.StockPricesDTO;
-import user.dto.userorders.CreateOrdersDTO;
 import user.dto.userorders.MaxMinDto;
 import user.dto.userorders.UserOrdersDto;
 import user.model.*;
@@ -112,7 +111,7 @@ public class OrderService {
             return order;
     }
 
-    public void validateTransaction(User user, CreateOrdersDTO order) throws InvalidOrderException {
+    public void validateTransaction(User user, UserOrdersDto order) throws InvalidOrderException {
 
 
         if(order.getType() == 1 ){

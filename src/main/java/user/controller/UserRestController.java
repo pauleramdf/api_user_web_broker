@@ -17,7 +17,7 @@ import java.security.Principal;
 import java.util.*;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8080")
 @ComponentScan("com.user.repository")
 @RequestMapping
 @RequiredArgsConstructor

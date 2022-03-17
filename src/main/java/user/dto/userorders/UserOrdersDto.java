@@ -1,6 +1,7 @@
 package user.dto.userorders;
 
 import lombok.Data;
+import user.model.User;
 import user.model.UserOrders;
 
 import javax.validation.constraints.Min;
@@ -40,6 +41,21 @@ public class UserOrdersDto {
 
     private Timestamp created;
     private Timestamp updated;
+
+    public UserOrders transformaParaObjeto(User user){
+        UserOrders order = new UserOrders();
+        order.setUser(user);
+        order.setIdStock(idStock);
+        order.setStockName(stockName);
+        order.setStockSymbol(stockSymbol);
+        order.setVolume(volume);
+        order.setPrice(price);
+        order.setTotalPrice(totalPrice);
+        order.setRemainingVolume(remainingVolume);
+        order.setType(type);
+        order.setStatus(1);
+        return order;
+    }
 
     public UserOrdersDto (UserOrders orders){
         this.id = orders.getId();

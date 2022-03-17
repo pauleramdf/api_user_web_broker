@@ -21,7 +21,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "http://localhost:8080")
 @ComponentScan("com.user.repository")
 @RequestMapping
 public class OrderRestController {
@@ -38,7 +38,7 @@ public class OrderRestController {
     private UserOrdersMatchsRepository matchsRepository;
 
     @PostMapping("/order")
-    public ResponseEntity<UserOrders> createOrder( @RequestBody @Valid CreateOrdersDTO order, @RequestHeader("Authorization") String token, Principal userJWT) {
+    public ResponseEntity<UserOrders> createOrder( @RequestBody @Valid UserOrdersDto order, @RequestHeader("Authorization") String token, Principal userJWT) {
         try{
         //checa se o user existe de fato
         User user = userService.findByName(userJWT.getName()).orElseThrow(Error::new);
