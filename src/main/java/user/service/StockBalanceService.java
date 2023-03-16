@@ -30,7 +30,7 @@ public class StockBalanceService {
     }
 
     public UserStockBalances save(UserStockBalances stockBalance) {
-        return userStockBalancesRepository.save(stockBsalance);
+        return userStockBalancesRepository.save(stockBalance);
     }
 
     public Optional<UserStockBalances> findById(UserStockBalancesId id) {

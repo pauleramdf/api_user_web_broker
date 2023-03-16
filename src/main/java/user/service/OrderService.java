@@ -1,13 +1,12 @@
 package user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import user.config.InvalidOrderException;
+import user.config.ApiUserDefaultException;
 import user.dto.userorders.FindAllOrdersByUserDTO;
 import user.dto.stocks.StockPricesDTO;
 import user.dto.userorders.MaxMinDto;
@@ -102,20 +101,20 @@ public class OrderService {
         return order;
     }
 
-    public void validateTransaction(User user, UserOrdersDto order) throws InvalidOrderException {
+    public void validateTransaction(User user, UserOrdersDto order) throws ApiUserDefaultException {
 
 
         if (order.getType() == 1) {
             UserStockBalances wallet = stockBalanceService.findWallet(new UserStockBalancesId(user, order.getIdStock())).orElseThrow();
             if (wallet.getVolume() < order.getVolume()) {
                 //invalid
-                throw new InvalidOrderException("Usuario não possui saldo suficiente da stock");
+                //throw new InvalidOrderException("Usuario não possui saldo suficiente da stock");
             }
             stockBalanceService.subVolumeWallet(wallet, order.getVolume());
         } else {
             if (user.getDollarBalance() < order.getPrice() * order.getVolume()) {
                 //invalid
-                throw new InvalidOrderException("Usuario não possui saldo suficiente na carteira");
+                throw new ApiUserDefaultException("Usuario não possui saldo suficiente na carteira");
             }
             userService.subDollarBalance(user, order.getPrice() * order.getVolume());
         }

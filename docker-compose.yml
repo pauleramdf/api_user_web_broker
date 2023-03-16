@@ -1,10 +1,10 @@
 version: '3'
 
 services:
-  front:
-    image: "front-stocks:v1"
-    ports:
-      - 8080:80
+#  front:
+#    image: "front-stocks:v1"
+#    ports:
+#      - 8080:80
   apiusers:
     image: "api-users:v1"
     ports:
@@ -25,7 +25,7 @@ services:
       - 5432:5432
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: solinftec
+      POSTGRES_PASSWORD: teste
       POSTGRES_DB: stocks
     volumes:
       - /var/usr/lib/postgresql/14/main
