@@ -24,25 +24,25 @@ public class StockBalanceService {
 
     private final UserRepository userRepository;
 
-    public UserStockBalances create(CreateStockBalanceDTO stockBalance, Principal user){
+    public UserStockBalances create(CreateStockBalanceDTO stockBalance, Principal user) {
         User owner = userRepository.findByName(user.getName()).orElseThrow();
         return userStockBalancesRepository.save(stockBalance.transformaDTO(owner));
     }
 
-    public UserStockBalances save(UserStockBalances stockBalance){
-        return userStockBalancesRepository.save(stockBalance);
+    public UserStockBalances save(UserStockBalances stockBalance) {
+        return userStockBalancesRepository.save(stockBsalance);
     }
 
-    public Optional<UserStockBalances> findById(UserStockBalancesId id){
+    public Optional<UserStockBalances> findById(UserStockBalancesId id) {
         return userStockBalancesRepository.findById(id);
     }
 
-    public void addVolumeWallet(UserStockBalances wallet, Long volume){
+    public void addVolumeWallet(UserStockBalances wallet, Long volume) {
         wallet.setVolume(wallet.getVolume() + volume);
         userStockBalancesRepository.save(wallet);
     }
 
-    public void subVolumeWallet(UserStockBalances wallet, Long volume){
+    public void subVolumeWallet(UserStockBalances wallet, Long volume) {
         wallet.setVolume(wallet.getVolume() - volume);
         userStockBalancesRepository.save(wallet);
     }

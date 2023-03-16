@@ -1,5 +1,6 @@
 package user.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,58 +20,49 @@ import user.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service("orderService")
 public class OrderService {
-    @Autowired
-    private UserOrdersRepository ordersRepository;
+    private final UserOrdersRepository ordersRepository;
+    private final UserRepository userRepository;
+    private final StockBalanceService stockBalanceService;
+    private final UserService userService;
+    private final StocksService stocksService;
+    private final UserOrdersMatchsRepository matchsRepository;
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StockBalanceService stockBalanceService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private StocksService stocksService;
-
-    @Autowired
-    private UserOrdersMatchsRepository matchsRepository;
-
-    public List<UserOrders> findAllBuyOrders(Long stockName, Double price){
+    public List<UserOrders> findAllBuyOrders(Long stockName, Double price) {
         return ordersRepository.findAllBuyOrders(stockName, price);
     }
 
-    public List<UserOrders> findAllSellOrders(Long stockName, Double price){
+    public List<UserOrders> findAllSellOrders(Long stockName, Double price) {
         return ordersRepository.findAllSellOrders(stockName, price);
     }
 
 
-
-    public void updateAllStatus(){
+    public void updateAllStatus() {
         List<UserOrders> orders = ordersRepository.findAllActive();
-        for ( UserOrders order: orders
-             ) {
-                order.setStatus(0);
-                ordersRepository.save(order);
+        for (UserOrders order : orders
+        ) {
+            order.setStatus(0);
+            ordersRepository.save(order);
         }
     }
-    public List<UserOrders> getAllOrdersActives(){
+
+    public List<UserOrders> getAllOrdersActives() {
         return ordersRepository.findAllActive();
     }
-    public UserOrders save(UserOrders orders){
+
+    public UserOrders save(UserOrders orders) {
         return ordersRepository.save(orders);
     }
 
-    public UserOrders subVolume(UserOrders order, Long volume){
+    public UserOrders subVolume(UserOrders order, Long volume) {
         order.setRemainingVolume(order.getRemainingVolume() - volume);
         return ordersRepository.save(order);
     }
 
-    public UserOrders addVolume(UserOrders order, Long volume){
-        order.setVolume( order.getRemainingVolume() + volume);
+    public UserOrders addVolume(UserOrders order, Long volume) {
+        order.setVolume(order.getRemainingVolume() + volume);
         return ordersRepository.save(order);
     }
 
@@ -94,45 +86,43 @@ public class OrderService {
         return ordersPage.map(UserOrdersDto::new);
     }
 
-    public UserOrders cancelOrder(UserOrders order, User user){
+    public UserOrders cancelOrder(UserOrders order, User user) {
 
-            this.disable(order);
-            if(order.getType() == 1){
-                //restituii sotckbalance
-                UserStockBalances wallet = stockBalanceService.findWallet( new UserStockBalancesId(user, order.getIdStock())).orElseThrow();
-                stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
-            }
-            else{
-                //restitui o dinheiro
-                Double restituicao = order.getRemainingVolume() * order.getPrice();
-                userService.addDollarBalance(user, restituicao);
+        this.disable(order);
+        if (order.getType() == 1) {
+            //restituii sotckbalance
+            UserStockBalances wallet = stockBalanceService.findWallet(new UserStockBalancesId(user, order.getIdStock())).orElseThrow();
+            stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
+        } else {
+            //restitui o dinheiro
+            Double restituicao = order.getRemainingVolume() * order.getPrice();
+            userService.addDollarBalance(user, restituicao);
 
-            }
-            return order;
+        }
+        return order;
     }
 
     public void validateTransaction(User user, UserOrdersDto order) throws InvalidOrderException {
 
 
-        if(order.getType() == 1 ){
-            UserStockBalances wallet =  stockBalanceService.findWallet(new UserStockBalancesId(user, order.getIdStock())).orElseThrow();
-            if(wallet.getVolume() < order.getVolume()){
+        if (order.getType() == 1) {
+            UserStockBalances wallet = stockBalanceService.findWallet(new UserStockBalancesId(user, order.getIdStock())).orElseThrow();
+            if (wallet.getVolume() < order.getVolume()) {
                 //invalid
                 throw new InvalidOrderException("Usuario não possui saldo suficiente da stock");
             }
             stockBalanceService.subVolumeWallet(wallet, order.getVolume());
-        }
-        else{
-            if (user.getDollarBalance() < order.getPrice()*order.getVolume()) {
+        } else {
+            if (user.getDollarBalance() < order.getPrice() * order.getVolume()) {
                 //invalid
                 throw new InvalidOrderException("Usuario não possui saldo suficiente na carteira");
             }
-            userService.subDollarBalance(user, order.getPrice()*order.getVolume());
+            userService.subDollarBalance(user, order.getPrice() * order.getVolume());
         }
 
     }
 
-    public ResponseEntity<UserOrders> buyDomain(UserOrders order, UserStockBalances wallet, String token){
+    public ResponseEntity<UserOrders> buyDomain(UserOrders order, UserStockBalances wallet, String token) {
         //encontra todas as ordens abertas de compra para essa mesma stock
         List<UserOrders> orders = this.findAllSellOrders(order.getIdStock(), order.getPrice());
         this.save(order);
@@ -151,7 +141,7 @@ public class OrderService {
                 }
                 //checa se essa ordem tem preço compativel com a ordem de compra
                 if (o.getRemainingVolume() <= order.getRemainingVolume()) {
-                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o,order));
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o, order));
                     matchsRepository.save(historic);
 
                     //subtrai da stockBalance o user atual
@@ -162,9 +152,9 @@ public class OrderService {
                     userService.addDollarBalance(o.getUser(), order.getPrice() * o.getRemainingVolume());
                     this.subVolume(o, o.getRemainingVolume());
                 }
-                if ( o.getRemainingVolume() >= order.getRemainingVolume()) {
+                if (o.getRemainingVolume() >= order.getRemainingVolume()) {
 
-                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o,order));
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(o, order));
                     matchsRepository.save(historic);
 
                     //atualiza o volume restante na ordem de compra
@@ -173,10 +163,10 @@ public class OrderService {
                     stockBalanceService.addVolumeWallet(wallet, order.getRemainingVolume());
 
                     //debita o valor na carteira do user dono da ordem de compra
-                    userService.addDollarBalance(o.getUser(), order.getPrice()* order.getRemainingVolume());
+                    userService.addDollarBalance(o.getUser(), order.getPrice() * order.getRemainingVolume());
 
                     //atualiza o volume restante na ordem de venda
-                    this.subVolume( order, order.getRemainingVolume());
+                    this.subVolume(order, order.getRemainingVolume());
                 }
             }
         }
@@ -199,11 +189,12 @@ public class OrderService {
 
         stocksService.updateAskBid(stockPrices, token);
     }
-    public MaxMinDto findMaxMinOrders(Long stock, Integer type){
-        return ordersRepository.findMaxMinOrders(stock, type).orElse(new MaxMinDto(null,null));
+
+    public MaxMinDto findMaxMinOrders(Long stock, Integer type) {
+        return ordersRepository.findMaxMinOrders(stock, type).orElse(new MaxMinDto(null, null));
     }
 
-    public ResponseEntity<UserOrders> sellDomain(User user, UserOrders order, String token){
+    public ResponseEntity<UserOrders> sellDomain(User user, UserOrders order, String token) {
 
         //encontra todas as ordens abertas de compra para essa mesma stock
         List<UserOrders> orders = this.findAllBuyOrders(order.getIdStock(), order.getPrice());
@@ -222,37 +213,36 @@ public class OrderService {
                 //checa se essa ordem tem preço compativel com a ordem de venda
                 if (o.getRemainingVolume() <= order.getRemainingVolume()) {
 
-                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order,o));
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order, o));
                     matchsRepository.save(historic);
                     //subtrai o volume da ordem de venda
                     this.subVolume(order, o.getRemainingVolume());
 
                     //credita o valor na carteira
-                    userService.addDollarBalance(user, o.getPrice()* o.getRemainingVolume());
+                    userService.addDollarBalance(user, o.getPrice() * o.getRemainingVolume());
 
                     //acha a carteida do user dono da ordem de compra
-                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getIdStock())).orElseThrow();
+                    UserStockBalances newWallet = stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(), o.getIdStock())).orElseThrow();
                     //acrescenta na stockBalance do user dono da ordem de compra
                     stockBalanceService.addVolumeWallet(newWallet, o.getRemainingVolume());
 
                     this.subVolume(o, o.getRemainingVolume());
 
 
-
                 }
-                if (o.getRemainingVolume() >= order.getRemainingVolume() ) {
+                if (o.getRemainingVolume() >= order.getRemainingVolume()) {
 
-                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order,o));
+                    UserOrdersMatchs historic = new UserOrdersMatchs(new UserOrdersMatchsId(order, o));
                     matchsRepository.save(historic);
 
                     //atualiza o volume restante na ordem de compra
                     this.subVolume(o, order.getRemainingVolume());
 
                     //credita o valor na carteira do user dono da ordem de venda
-                    userService.addDollarBalance(user, o.getPrice()* order.getRemainingVolume());
+                    userService.addDollarBalance(user, o.getPrice() * order.getRemainingVolume());
 
                     //acha a carteida do user dono da ordem de compra
-                    UserStockBalances newWallet =  stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(),o.getIdStock())).orElseThrow();
+                    UserStockBalances newWallet = stockBalanceService.findWallet(new UserStockBalancesId(o.getUser(), o.getIdStock())).orElseThrow();
                     //acrescenta na stockBalance do user dono da ordem de compra
                     stockBalanceService.subVolumeWallet(newWallet, order.getRemainingVolume());
 

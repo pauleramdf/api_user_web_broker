@@ -32,12 +32,12 @@ class UserRestController {
     }
 
     @GetMapping(value = "/user", produces = "application/json")
-    public ResponseEntity<List<UserResponseDTO>>  getUsers() {
-        try{
+    public ResponseEntity<List<UserResponseDTO>> getUsers() {
+        try {
             List<UserResponseDTO> users = userService.findAll();
 
             return new ResponseEntity<>(users, HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
 
@@ -49,7 +49,7 @@ class UserRestController {
         User user = userService.findById(userId).orElseThrow();
         user.setEnabled(false);
         UserResponseDTO u = new UserResponseDTO(userService.save(user));
-        return new ResponseEntity<>(u,HttpStatus.OK );
+        return new ResponseEntity<>(u, HttpStatus.OK);
     }
 
     @PostMapping(value = "/user", produces = "application/json")
@@ -59,8 +59,8 @@ class UserRestController {
     }
 
     @GetMapping(value = "/hello", produces = "application/json")
-    public String sayHello( Principal user, @AuthenticationPrincipal Jwt jwt) {
-         return String.format("Hello, %s!", user.getName());
+    public String sayHello(Principal user, @AuthenticationPrincipal Jwt jwt) {
+        return String.format("Hello, %s!", user.getName());
     }
 }
 
