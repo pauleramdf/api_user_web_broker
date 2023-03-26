@@ -23,7 +23,6 @@ import java.util.Optional;
 @Service("orderService")
 public class OrderService {
     private final UserOrdersRepository ordersRepository;
-    private final UserRepository userRepository;
     private final StockBalanceService stockBalanceService;
     private final UserService userService;
     private final StocksService stocksService;
@@ -71,7 +70,7 @@ public class OrderService {
     }
 
     public List<FindAllOrdersByUserDTO> findAllOrdersByUser(String username) {
-        User user = userRepository.findByName(username).orElseThrow();
+        User user = userService.findByName(username).orElseThrow();
         return ordersRepository.findAllOrdersByUser(user.getId()).stream().map(FindAllOrdersByUserDTO::new).toList();
     }
 
@@ -80,7 +79,7 @@ public class OrderService {
     }
 
     public Page<UserOrdersDto> findUserOrders(Pageable pageable, String username) {
-        User user = userRepository.findByName(username).orElseThrow();
+        User user = userService.findByName(username).orElseThrow();
         Page<UserOrders> ordersPage = ordersRepository.findAllPaged(pageable, user.getId());
         return ordersPage.map(UserOrdersDto::new);
     }

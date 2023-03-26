@@ -12,7 +12,7 @@ import user.dto.userstockbalances.WalletDTO;
 import user.model.UserStockBalances;
 import user.service.StockBalanceService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 

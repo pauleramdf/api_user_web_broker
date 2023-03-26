@@ -14,7 +14,7 @@ import user.service.OrderService;
 import user.service.StockBalanceService;
 import user.service.UserService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 

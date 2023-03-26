@@ -2,8 +2,6 @@ package user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import user.config.ApiUserDefaultException;
-import user.dto.user.SignInDTO;
 import user.dto.user.TokenDTO;
 import user.dto.user.UserResponseDTO;
 import user.model.User;
@@ -36,7 +34,7 @@ public class UserService {
     }
 
     public Optional<User> findByName(String name) {
-        return userRepository.findByName(name);
+        return userRepository.findByUsername(name);
     }
 
     public User save(User user) {
@@ -59,13 +57,5 @@ public class UserService {
         tokenDTO.setExpiresIn(Timestamp.from(Instant.MAX));
 
         return tokenDTO;
-    }
-
-    public User signInUser(SignInDTO user) throws ApiUserDefaultException {
-        User user1 = userRepository.findByName(user.getUsername()).orElseThrow();
-        if(user.getPassword().equals(user1.getPassword())){
-            return user1;
-        }
-        else throw new ApiUserDefaultException("Não ta logado");
     }
 }
