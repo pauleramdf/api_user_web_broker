@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import user.config.ApiUserDefaultException;
 import user.dto.AuthenticationRequest;
 import user.dto.AuthenticationResponse;
 import user.dto.RegisterRequest;
@@ -13,47 +14,57 @@ import user.enums.TokenType;
 import user.model.Token;
 import user.model.User;
 import user.repository.TokenRepository;
-import user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-    private final UserRepository repository;
+    private final UserService userService;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public AuthenticationResponse register(RegisterRequest request) throws ApiUserDefaultException {
+        if(userService.checkIfUsernameIsInUse(request.getUsername())){
+            throw new ApiUserDefaultException("EMAIL_IN_USE");
+        }
+
         var user = User.builder()
                 .username(request.getUsername())
-                .email(request.getEmail())
+                .fullName(request.getFullName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .dollarBalance(request.getDollarBalance())
                 .role(Role.USER)
                 .build();
-        var savedUser = repository.save(user);
+        var savedUser = userService.save(user);
         var jwtToken = jwtService.generateToken(user);
         saveUserToken(savedUser, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .username(savedUser.getUsername())
+                .dollarBalance(savedUser.getDollarBalance())
+                .fullName(savedUser.getFullName())
                 .build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
+                        request.getUsername(),
                         request.getPassword()
                 )
         );
-        var user = repository.findByEmail(request.getEmail())
+        var user = userService.findByName(request.getUsername())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
         return AuthenticationResponse.builder()
                 .token(jwtToken)
+                .id(user.getId())
+                .username(user.getUsername())
+                .dollarBalance(user.getDollarBalance())
+                .fullName(user.getFullName())
                 .build();
     }
 

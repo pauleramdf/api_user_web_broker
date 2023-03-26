@@ -11,85 +11,51 @@ import user.dto.userorders.*;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
 import user.service.OrderService;
-import user.service.StockBalanceService;
-import user.service.UserService;
 
 import jakarta.validation.Valid;
-import java.security.Principal;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
-@RequestMapping
+@RequestMapping("/order")
 @RequiredArgsConstructor
 public class OrderRestController {
 
-    private final StockBalanceService stockBalanceService;
     private final OrderService orderService;
-    private final UserService userService;
     private final UserOrdersMatchsRepository matchsRepository;
 
-    @PostMapping("/order")
-    public ResponseEntity<UserOrders> createOrder(@RequestBody @Valid UserOrdersDto order, @RequestHeader("Authorization") String token, Principal userJWT)  throws ApiUserDefaultException {
-        try {
-            //checa se o user existe de fato
-            User user = userService.findByName(userJWT.getName()).orElseThrow(Error::new);
-            //valida a transação
-            orderService.validateTransaction(user, order);
+    @PostMapping()
+    public ResponseEntity<UserOrders> createOrder(@RequestBody @Valid UserOrdersDto order, @RequestHeader("Authorization") String token)  throws ApiUserDefaultException {
+            return new ResponseEntity<>(orderService.createOrder(order, token), HttpStatus.CREATED);
 
-            //cria ordem
-            UserOrders createdOrder = order.transformaParaObjeto(user);
-
-            //pega a carteira existente ou caso não exista cria uma zerada
-            UserStockBalances wallet
-                    = stockBalanceService.findById(new UserStockBalancesId(user, order.getIdStock())).orElse(new UserStockBalances(new UserStockBalancesId(user, order.getIdStock()), order.getStockSymbol(), order.getStockName(), 0L));
-
-            if (order.getType() == 1) {
-                return orderService.sellDomain(user, createdOrder, token);
-            } else {
-                return orderService.buyDomain(createdOrder, wallet, token);
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
     }
 
-    @GetMapping("/order")
-    public ResponseEntity<List<FindAllOrdersByUserDTO>> getOrders(Principal userJWT) {
-        return new ResponseEntity<>(orderService.findAllOrdersByUser(userJWT.getName()), HttpStatus.OK);
+    @GetMapping()
+    public ResponseEntity<List<FindAllOrdersByUserDTO>> getOrders() {
+        return new ResponseEntity<>(orderService.findAllOrdersByUser(), HttpStatus.OK);
     }
 
-    @PostMapping("/order/cancel")
-    public ResponseEntity<UserOrders> cancelOrder(@Valid @RequestBody CancelOrdersDTO orderdto, Principal userJWT) {
+    @PostMapping("/cancel")
+    public ResponseEntity<UserOrders> cancelOrder(@Valid @RequestBody CancelOrdersDTO orderdto) {
         //cancela a ordem de Compra/Venda
         //resititui o volume ou dollar balance que ainda não foi utilizado
-
-        try {
-            User user = userService.findByName(userJWT.getName()).orElseThrow();
-            UserOrders order = orderService.findById(orderdto.getId()).orElseThrow();
-
-            return new ResponseEntity<>(orderService.cancelOrder(order, user), HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-
+        return new ResponseEntity<>(orderService.cancelOrder(orderdto), HttpStatus.OK);
     }
 
-    @PostMapping("order/paged")
-    public ResponseEntity<Page<UserOrdersDto>> getPage(Pageable pageable, Principal userJWT) {
+    @PostMapping("/paged")
+    public ResponseEntity<Page<UserOrdersDto>> getPage(Pageable pageable) {
         try {
-            return ResponseEntity.ok().body(orderService.findUserOrders(pageable, userJWT.getName()));
+            return ResponseEntity.ok().body(orderService.findUserOrders(pageable));
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
-    @GetMapping("/order/matchs/buy/{id}")
+    @GetMapping("/matchs/buy/{id}")
     public ResponseEntity<List<UserOrdersMatchs>> gethistoryBuy(@PathVariable(value = "id") Long orderId) {
         return new ResponseEntity<>(matchsRepository.getMatchBuyHistory(orderId), HttpStatus.OK);
     }
 
-    @GetMapping("/order/matchs/sell/{id}")
+    @GetMapping("/matchs/sell/{id}")
     public ResponseEntity<List<UserOrdersMatchs>> gethistorySell(@PathVariable(value = "id") Long orderId) {
         return new ResponseEntity<>(matchsRepository.getMatchSellHistory(orderId), HttpStatus.OK);
     }
