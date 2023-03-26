@@ -7,6 +7,7 @@ import user.model.User;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Objects;
 
 @Data
 public class CreateUserDTO {
@@ -19,6 +20,9 @@ public class CreateUserDTO {
     private Double dollarBalance;
 
     public User transformaDTO(){
+        if(Objects.isNull(dollarBalance)){
+            dollarBalance = 1000D;
+        }
         return new User(username, password, dollarBalance);
     }
 }

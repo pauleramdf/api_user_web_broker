@@ -1,12 +1,5 @@
-#org.springframework.security.oauth2.jwt.JwtDecoder=
-#spring.security.oauth2.client.registration.okta.client-id=0oa3jwkz7sKKVpxWN5d7
-#spring.security.oauth2.client.registration.okta.client-secret=vdPLXZlfpq-G4ybHprHIKLOt-3iqYw8RG_SW5Ueb
-#spring.security.oauth2.client.registration.okta.authorization-grant-type=client_credentials
-#spring.security.oauth2.client.registration.okta.scope=mod_custom
-#spring.security.oauth2.client.provider.okta.token-uri=https://dev-8471287.okta.com/oauth2/default/v1/token
-
 server:
-    port: 8082
+    port: 8081
     error:
         include-message: always
         include-exception: true
@@ -54,12 +47,6 @@ springdoc:
 logging:
     level:
         ROOT: info
-
-okta:
-    oauth2:
-        issuer: https://dev-8471287.okta.com/oauth2/default
-        client-id: 0oa3jwkz7sKKVpxWN5d7
-        client-secret: vdPLXZlfpq-G4ybHprHIKLOt-3iqYw8RG_SW5Ueb
 
 #corrige bug no flyway
 flyway:

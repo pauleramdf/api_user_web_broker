@@ -1,12 +1,12 @@
-package user.controller;
+package user.resource;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import user.config.ApiUserDefaultException;
 import user.dto.userorders.*;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
@@ -20,7 +20,6 @@ import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:8080")
-@ComponentScan("com.user.repository")
 @RequestMapping
 @RequiredArgsConstructor
 public class OrderRestController {
@@ -31,7 +30,7 @@ public class OrderRestController {
     private final UserOrdersMatchsRepository matchsRepository;
 
     @PostMapping("/order")
-    public ResponseEntity<UserOrders> createOrder(@RequestBody @Valid UserOrdersDto order, @RequestHeader("Authorization") String token, Principal userJWT) {
+    public ResponseEntity<UserOrders> createOrder(@RequestBody @Valid UserOrdersDto order, @RequestHeader("Authorization") String token, Principal userJWT)  throws ApiUserDefaultException {
         try {
             //checa se o user existe de fato
             User user = userService.findByName(userJWT.getName()).orElseThrow(Error::new);

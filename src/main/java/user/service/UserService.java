@@ -2,10 +2,15 @@ package user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import user.config.ApiUserDefaultException;
+import user.dto.user.SignInDTO;
+import user.dto.user.TokenDTO;
 import user.dto.user.UserResponseDTO;
 import user.model.User;
 import user.repository.UserRepository;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,10 +40,8 @@ public class UserService {
     }
 
     public User save(User user) {
-        return userRepository.save(user);
+        return  userRepository.save(user);
     }
-
-
     public List<UserResponseDTO> findAll() {
         List<UserResponseDTO> ls = new ArrayList<>();
         List<User> list = userRepository.findAll();
@@ -47,5 +50,22 @@ public class UserService {
             ls.add(new UserResponseDTO(user));
         }
         return ls;
+    }
+
+    public TokenDTO createUser(User user){
+        save(user);
+        TokenDTO tokenDTO = new TokenDTO();
+        tokenDTO.setToken("token");
+        tokenDTO.setExpiresIn(Timestamp.from(Instant.MAX));
+
+        return tokenDTO;
+    }
+
+    public User signInUser(SignInDTO user) throws ApiUserDefaultException {
+        User user1 = userRepository.findByName(user.getUsername()).orElseThrow();
+        if(user.getPassword().equals(user1.getPassword())){
+            return user1;
+        }
+        else throw new ApiUserDefaultException("Não ta logado");
     }
 }
