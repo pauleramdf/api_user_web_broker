@@ -5,7 +5,8 @@ server:
         include-exception: true
         include-stacktrace: always
         include-binding-errors: always
-
+config:
+    api-stocks-url: ${API_STOCKS_URL:http://localhost:8083}
 spring:
     profiles:
         active: ${ACTIVE_PROFILE:development}

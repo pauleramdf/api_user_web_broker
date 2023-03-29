@@ -1,12 +1,10 @@
 package user.resource;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import user.config.ApiUserDefaultException;
 import user.dto.AuthenticationRequest;
 import user.dto.AuthenticationResponse;
@@ -16,6 +14,7 @@ import user.service.AuthenticationService;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 @Controller
+@Slf4j
 public class AuthenticationResource {
 
     private final AuthenticationService service;

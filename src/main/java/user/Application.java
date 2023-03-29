@@ -1,5 +1,7 @@
 package user;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +13,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @SpringBootApplication
 @EnableJpaAuditing
+@RequiredArgsConstructor
 public class Application {
+    @Value("${config.api-stocks-url}")
+    private String apiStocksUrl;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
@@ -20,21 +25,8 @@ public class Application {
 
     @Bean
     public WebClient webClient(WebClient.Builder builder){
-        // quando for no docker "http://apistocks:8083"
-        //quando nao for no docker "http://localhost:8083"
         return  builder
-                .baseUrl("http://localhost:8083")
+                .baseUrl(apiStocksUrl)
                 .build();
     }
-
-//    @Configuration
-//    @EnableWebSecurity
-//    class SecurityConfiguration extends WebSecurityConfigurerAdapter {
-//        @Override
-//        protected void configure(HttpSecurity http) throws Exception {
-//            http.cors().and()
-//                    .authorizeRequests(authorizeRequests -> authorizeRequests.anyRequest().authenticated())
-//                    .oauth2ResourceServer().jwt();
-//        }
-//    }
 }
