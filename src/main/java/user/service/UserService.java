@@ -1,7 +1,9 @@
 package user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import user.dto.user.IncrementDollarBalanceDTO;
 import user.dto.user.UserResponseDTO;
 import user.model.User;
 import user.repository.UserRepository;
@@ -51,5 +53,11 @@ public class UserService {
             ls.add(new UserResponseDTO(user));
         }
         return ls;
+    }
+
+    public void incrementDolarBallance(IncrementDollarBalanceDTO dolarBallance) {
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = findByName(principal.getUsername()).orElseThrow();
+        addDollarBalance(user, dolarBallance.getDollarBalance());
     }
 }

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import user.dto.user.IncrementDollarBalanceDTO;
 import user.dto.user.UserResponseDTO;
 import user.model.User;
 import user.service.UserService;
@@ -14,14 +15,13 @@ import java.security.Principal;
 import java.util.*;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping("/user")
 @RequiredArgsConstructor
 @Slf4j
 class UserRestController {
     private final UserService userService;
 
-        @GetMapping(value = "/info", produces = "application/json")
+    @GetMapping(value = "/info", produces = "application/json")
     public ResponseEntity<UserResponseDTO> getUser(Principal principal) {
         String username = principal.getName();
         UserResponseDTO u = new UserResponseDTO(userService.findByName(username).orElseThrow());
@@ -47,6 +47,12 @@ class UserRestController {
         user.setEnabled(false);
         UserResponseDTO u = new UserResponseDTO(userService.save(user));
         return new ResponseEntity<>(u, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/dollar-balance", produces = "application/json")
+    public ResponseEntity<Void> incrementDollarBalance(@Valid @RequestBody IncrementDollarBalanceDTO dollarBalance) {
+        userService.incrementDolarBallance(dollarBalance);
+        return ResponseEntity.ok().build();
     }
 }
 
