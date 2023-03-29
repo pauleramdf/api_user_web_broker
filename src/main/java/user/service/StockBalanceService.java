@@ -25,7 +25,14 @@ public class StockBalanceService {
 
     public UserStockBalances create(CreateStockBalanceDTO stockBalance, Principal user) {
         User owner = userService.findByName(user.getName()).orElseThrow();
-        return userStockBalancesRepository.save(stockBalance.transformaDTO(owner));
+        UserStockBalancesId id = new UserStockBalancesId(owner, stockBalance.getIdStock());
+        var wallet = userStockBalancesRepository.findById(id);
+        if(wallet.isPresent()){
+            wallet.get().setVolume(wallet.get().getVolume() + stockBalance.getVolume());
+            return userStockBalancesRepository.save(wallet.get());
+        }else{
+            return userStockBalancesRepository.save(stockBalance.transformaDTO(owner));
+        }
     }
 
     public UserStockBalances save(UserStockBalances stockBalance) {

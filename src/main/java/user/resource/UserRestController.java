@@ -21,7 +21,7 @@ import java.util.*;
 class UserRestController {
     private final UserService userService;
 
-    @GetMapping(value = "/info", produces = "application/json")
+        @GetMapping(value = "/info", produces = "application/json")
     public ResponseEntity<UserResponseDTO> getUser(Principal principal) {
         String username = principal.getName();
         UserResponseDTO u = new UserResponseDTO(userService.findByName(username).orElseThrow());
