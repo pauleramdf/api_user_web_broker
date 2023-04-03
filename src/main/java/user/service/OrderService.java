@@ -1,13 +1,14 @@
 package user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import user.config.InvalidOrderException;
+import user.config.ApiUserDefaultException;
+import user.dto.userorders.CancelOrdersDTO;
 import user.dto.userorders.FindAllOrdersByUserDTO;
 import user.dto.stocks.StockPricesDTO;
 import user.dto.userorders.MaxMinDto;
@@ -15,16 +16,13 @@ import user.dto.userorders.UserOrdersDto;
 import user.model.*;
 import user.repository.UserOrdersMatchsRepository;
 import user.repository.UserOrdersRepository;
-import user.repository.UserRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service("orderService")
 public class OrderService {
     private final UserOrdersRepository ordersRepository;
-    private final UserRepository userRepository;
     private final StockBalanceService stockBalanceService;
     private final UserService userService;
     private final StocksService stocksService;
@@ -71,22 +69,24 @@ public class OrderService {
         ordersRepository.save(order);
     }
 
-    public List<FindAllOrdersByUserDTO> findAllOrdersByUser(String username) {
-        User user = userRepository.findByName(username).orElseThrow();
+    public List<FindAllOrdersByUserDTO> findAllOrdersByUser() {
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByName(principal.getUsername()).orElseThrow();
         return ordersRepository.findAllOrdersByUser(user.getId()).stream().map(FindAllOrdersByUserDTO::new).toList();
     }
 
-    public Optional<UserOrders> findById(Long id) {
-        return ordersRepository.findById(id);
-    }
+    public Page<UserOrdersDto> findUserOrders(Pageable pageable) {
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    public Page<UserOrdersDto> findUserOrders(Pageable pageable, String username) {
-        User user = userRepository.findByName(username).orElseThrow();
+        User user = userService.findByName(principal.getUsername()).orElseThrow();
         Page<UserOrders> ordersPage = ordersRepository.findAllPaged(pageable, user.getId());
         return ordersPage.map(UserOrdersDto::new);
     }
 
-    public UserOrders cancelOrder(UserOrders order, User user) {
+    public UserOrders cancelOrder(CancelOrdersDTO cancelOrdersDTO) {
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = userService.findByName(principal.getUsername()).orElseThrow();
+        UserOrders order = ordersRepository.findById(cancelOrdersDTO.getId()).orElseThrow();
 
         this.disable(order);
         if (order.getType() == 1) {
@@ -102,27 +102,27 @@ public class OrderService {
         return order;
     }
 
-    public void validateTransaction(User user, UserOrdersDto order) throws InvalidOrderException {
+    public void validateTransaction(User user, UserOrdersDto order) throws ApiUserDefaultException {
 
 
         if (order.getType() == 1) {
             UserStockBalances wallet = stockBalanceService.findWallet(new UserStockBalancesId(user, order.getIdStock())).orElseThrow();
             if (wallet.getVolume() < order.getVolume()) {
                 //invalid
-                throw new InvalidOrderException("Usuario não possui saldo suficiente da stock");
+                //throw new InvalidOrderException("Usuario não possui saldo suficiente da stock");
             }
             stockBalanceService.subVolumeWallet(wallet, order.getVolume());
         } else {
             if (user.getDollarBalance() < order.getPrice() * order.getVolume()) {
                 //invalid
-                throw new InvalidOrderException("Usuario não possui saldo suficiente na carteira");
+                throw new ApiUserDefaultException("Usuario não possui saldo suficiente na carteira");
             }
             userService.subDollarBalance(user, order.getPrice() * order.getVolume());
         }
 
     }
 
-    public ResponseEntity<UserOrders> buyDomain(UserOrders order, UserStockBalances wallet, String token) {
+    public UserOrders buyDomain(UserOrders order, UserStockBalances wallet, String token) {
         //encontra todas as ordens abertas de compra para essa mesma stock
         List<UserOrders> orders = this.findAllSellOrders(order.getIdStock(), order.getPrice());
         this.save(order);
@@ -131,7 +131,7 @@ public class OrderService {
         //caso nao existam ordens de compra abertas para essa stock a ordem é salva.
         if (orders.isEmpty()) {
             stockBalanceService.save(wallet);
-            return new ResponseEntity<>(order, HttpStatus.CREATED);
+            return order;
         } else {
             for (UserOrders o : orders) {
                 //caso não reste volume a venda a ordem é desativada
@@ -173,7 +173,7 @@ public class OrderService {
 
         this.updateAllStatus();
         this.updateAskBid(order.getIdStock(), token);
-        return new ResponseEntity<>(order, HttpStatus.CREATED);
+        return order;
     }
 
     private void updateAskBid(Long idStock, String token) {
@@ -194,7 +194,7 @@ public class OrderService {
         return ordersRepository.findMaxMinOrders(stock, type).orElse(new MaxMinDto(null, null));
     }
 
-    public ResponseEntity<UserOrders> sellDomain(User user, UserOrders order, String token) {
+    public UserOrders sellDomain(User user, UserOrders order, String token) {
 
         //encontra todas as ordens abertas de compra para essa mesma stock
         List<UserOrders> orders = this.findAllBuyOrders(order.getIdStock(), order.getPrice());
@@ -203,7 +203,7 @@ public class OrderService {
 
         //caso nao existam ordens de compra abertas para essa stock a ordem é salva.
         if (orders.isEmpty()) {
-            return new ResponseEntity<>(order, HttpStatus.CREATED);
+            return order;
         } else {
             for (UserOrders o : orders) {
                 if (order.getRemainingVolume().equals(0L)) {
@@ -254,8 +254,29 @@ public class OrderService {
         }
         this.updateAllStatus();
         this.updateAskBid(order.getIdStock(), token);
-        return new ResponseEntity<>(order, HttpStatus.CREATED);
+        return order;
     }
 
 
+    public UserOrders createOrder(UserOrdersDto order, String token) throws ApiUserDefaultException {
+
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //checa se o user existe de fato
+        User user = userService.findByName(principal.getUsername()).orElseThrow(Error::new);
+        //valida a transação
+        validateTransaction(user, order);
+
+        //cria ordem
+        UserOrders createdOrder = order.transformaParaObjeto(user);
+
+        //pega a carteira existente ou caso não exista cria uma zerada
+        UserStockBalances wallet
+                = stockBalanceService.findById(new UserStockBalancesId(user, order.getIdStock())).orElse(new UserStockBalances(new UserStockBalancesId(user, order.getIdStock()), order.getStockSymbol(), order.getStockName(), 0L));
+
+        if (order.getType() == 1) {
+            return sellDomain(user, createdOrder, token);
+        } else {
+            return buyDomain(createdOrder, wallet, token);
+        }
+    }
 }

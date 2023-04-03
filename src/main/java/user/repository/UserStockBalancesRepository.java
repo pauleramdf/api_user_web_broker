@@ -19,5 +19,4 @@ public interface UserStockBalancesRepository extends JpaRepository<UserStockBala
 
     @Query("select usb from UserStockBalances usb where usb.id.user.id = :id_user order by usb.id.idStock")
     Page<UserStockBalances>findAllByUserPaged( Pageable pageable, @Param("id_user") Long idUser);
-
 }

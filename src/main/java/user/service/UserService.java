@@ -1,10 +1,13 @@
 package user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import user.dto.user.IncrementDollarBalanceDTO;
 import user.dto.user.UserResponseDTO;
 import user.model.User;
 import user.repository.UserRepository;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,13 +34,16 @@ public class UserService {
     }
 
     public Optional<User> findByName(String name) {
-        return userRepository.findByName(name);
+        return userRepository.findByUsername(name);
     }
 
     public User save(User user) {
         return userRepository.save(user);
     }
 
+    public Boolean checkIfUsernameIsInUse(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
 
     public List<UserResponseDTO> findAll() {
         List<UserResponseDTO> ls = new ArrayList<>();
@@ -47,5 +53,11 @@ public class UserService {
             ls.add(new UserResponseDTO(user));
         }
         return ls;
+    }
+
+    public void incrementDolarBallance(IncrementDollarBalanceDTO dolarBallance) {
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = findByName(principal.getUsername()).orElseThrow();
+        addDollarBalance(user, dolarBallance.getDollarBalance());
     }
 }

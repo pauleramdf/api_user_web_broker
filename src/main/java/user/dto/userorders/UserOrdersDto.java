@@ -1,23 +1,24 @@
 package user.dto.userorders;
 
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import user.model.User;
 import user.model.UserOrders;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserOrdersDto {
-    @NotNull
     private Long id;
     @NotNull
     private Integer type;
-    @NotNull
     private Integer status;
-    @NotBlank
     private String username;
     @Min(1)
     @NotNull

@@ -2,31 +2,59 @@ version: '3'
 
 services:
   front:
-    image: "front-stocks:v1"
+    image: "front-web-broker:1.0"
     ports:
-      - 8080:80
+      - "8080:80"
+
   apiusers:
-    image: "api-users:v1"
+    container_name: api-user
+    image: "user-web-broker:1.0"
     ports:
-      - 8082:8082
+      - "8081:8081"
     environment:
-      DB_URL: jdbc:postgresql://database:5432/stock_users
+      DB_URL: jdbc:postgresql://db-user:5433/users
+      DB_USER: postgres
+      DB_PASSWD: postgres
+      API_STOCKS_URL: api-stocks:8083
     restart: always
+    depends_on:
+      - database-user
+
   apistocks:
-    image: "api_stocks:v1"
+    container_name: api-stocks
+    image: "stocks-web-broker:1.0"
     ports:
-      - 8083:8083
+      - "8083:8083"
     environment:
-      DB_URL: jdbc:postgresql://database:5432/stocks
+      DB_URL: jdbc:postgresql://db-stocks:5432/stocks
     restart: always
-  database:
+    depends_on:
+      - database-stocks
+
+
+  database-stocks:
+    container_name: db-stocks
     image: 'postgres:latest'
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: solinftec
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: stocks
     volumes:
       - /var/usr/lib/postgresql/14/main
     restart: always
+
+  database-user:
+    container_name: db-user
+    image: 'postgres:latest'
+    ports:
+      - "5433:5433"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users
+    volumes:
+      - /var/usr/lib/postgresql/14/main
+    restart: always
+    command: -p 5433

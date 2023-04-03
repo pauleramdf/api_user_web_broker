@@ -1,7 +1,6 @@
-package user.controller;
+package user.resource;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -12,26 +11,24 @@ import user.dto.userstockbalances.WalletDTO;
 import user.model.UserStockBalances;
 import user.service.StockBalanceService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.security.Principal;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
-@ComponentScan("com.user.repository")
-@RequestMapping()
+@RequestMapping("/stockbalances")
 public class StockBalancesRestController {
 
     private final StockBalanceService stockBalanceService;
 
-    @GetMapping("/stockbalances")
+    @GetMapping()
     public ResponseEntity<List<WalletDTO>> getStockBalances(Principal user) {
         List<WalletDTO> wallet = stockBalanceService.findAllByUser(user);
         return new ResponseEntity<>(wallet, HttpStatus.OK);
     }
 
-    @PostMapping("/stockbalances/page")
+    @PostMapping("/page")
     public ResponseEntity<Page<WalletDTO>> getStockBalancesPage(Pageable pageable, Principal user) {
         try {
             return ResponseEntity.ok().body(stockBalanceService.findAllByUserPage(pageable, user));
@@ -40,7 +37,7 @@ public class StockBalancesRestController {
         }
     }
 
-    @PostMapping("/stockbalances/create")
+    @PostMapping("/create")
     public ResponseEntity<UserStockBalances> createStockBalance(@Valid @RequestBody CreateStockBalanceDTO stockBalance, Principal user) {
         UserStockBalances wallet = stockBalanceService.create(stockBalance, user);
         return new ResponseEntity<>(wallet, HttpStatus.CREATED);
