@@ -23,7 +23,7 @@ spring:
             on-profile: development
     datasource:
         driver-class-name: org.postgresql.Driver
-        url: ${DB_URL:jdbc:postgresql://localhost:5432/stock_users}
+        url: ${DB_URL:jdbc:postgresql://localhost:5432/stocks_broker_user}
         username: ${DB_USER:postgres}
         password: ${DB_PASSWD:postgres}
         hikari:
@@ -60,3 +60,29 @@ flyway:
         multipart:
             max-file-size: 30MB
             max-request-size: 30MB
+
+---
+spring:
+    config:
+        activate:
+            on-profile: production
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: ${DB_URL:jdbc:postgresql://containers-us-west-207.railway.app:5770/stocks_broker_user}
+        username: ${DB_USER:postgres}
+        password: ${DB_PASSWD:postgres}
+        hikari:
+            connection-timeout: 30000
+            idle-timeout: 600000
+            max-lifetime: 1800000
+            minimum-idle: 5
+            maximum-pool-size: 5
+    jpa:
+        show-sql: true
+        properties:
+            hibernate:
+                format_sql: false
+        database: postgresql
+        hibernate:
+            ddl-auto: update
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
