@@ -7,6 +7,10 @@ server:
         include-binding-errors: always
 config:
     api-stocks-url: ${API_STOCKS_URL:http://localhost:8083}
+    kafka-config:
+        address:  ${KAFKA_ADDRESS:54.232.4.177:19092,54.232.4.177:29092,54.232.4.177:39092}
+        topic:
+            name: stocks
 spring:
     profiles:
         active: ${ACTIVE_PROFILE:development}
@@ -15,6 +19,14 @@ spring:
     flyway:
         baseline-on-migrate: true
         locations: classpath:db/migration
+    kafka:
+        producer:
+            properties:
+                spring:
+                    json:
+                        add:
+                            type:
+                                headers: false
 
 ---
 spring:
@@ -78,7 +90,7 @@ spring:
             minimum-idle: 5
             maximum-pool-size: 5
     jpa:
-        show-sql: true
+        show-sql: false
         properties:
             hibernate:
                 format_sql: false
