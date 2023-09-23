@@ -55,9 +55,10 @@ public class UserService {
         return ls;
     }
 
-    public void incrementDolarBallance(IncrementDollarBalanceDTO dolarBallance) {
+    public void incrementDolarBallance(IncrementDollarBalanceDTO dolarBalance) {
         User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = findByName(principal.getUsername()).orElseThrow();
-        addDollarBalance(user, dolarBallance.getDollarBalance());
+
+        addDollarBalance(user, dolarBalance.getDollarBalance());
     }
 }

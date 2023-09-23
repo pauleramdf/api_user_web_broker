@@ -1,5 +1,6 @@
 package user.resource;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/stockbalances")
+@Tag(name = "StocksBalance")
 public class StockBalancesRestController {
 
     private final StockBalanceService stockBalanceService;
@@ -30,11 +32,7 @@ public class StockBalancesRestController {
 
     @PostMapping("/page")
     public ResponseEntity<Page<WalletDTO>> getStockBalancesPage(Pageable pageable, Principal user) {
-        try {
-            return ResponseEntity.ok().body(stockBalanceService.findAllByUserPage(pageable, user));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok().body(stockBalanceService.findAllByUserPage(pageable, user));
     }
 
     @PostMapping("/create")

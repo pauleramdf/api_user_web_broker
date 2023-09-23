@@ -1,5 +1,6 @@
 package user.resource;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.*;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "User")
 class UserRestController {
     private final UserService userService;
 
@@ -30,14 +32,8 @@ class UserRestController {
 
     @GetMapping( produces = "application/json")
     public ResponseEntity<List<UserResponseDTO>> getUsers() {
-        try {
-            List<UserResponseDTO> users = userService.findAll();
-
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
-
+        List<UserResponseDTO> users = userService.findAll();
+        return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PatchMapping(value = "/disable/{id}", produces = "application/json")

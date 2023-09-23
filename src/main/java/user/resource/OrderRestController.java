@@ -1,5 +1,10 @@
 package user.resource;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +23,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/order")
 @RequiredArgsConstructor
+@Tag(name = "Order")
 public class OrderRestController {
 
     private final OrderService orderService;
     private final UserOrdersMatchsRepository matchsRepository;
 
+    @Operation(summary = "Create Order",
+            description = ".Ex.: '/order",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully created"),
+                    @ApiResponse(responseCode = "404", description = "Error interno", content = @Content(schema = @Schema(hidden = true)))
+            })
     @PostMapping()
     public ResponseEntity<UserOrders> createOrder(@RequestBody @Valid UserOrdersDto order, @RequestHeader("Authorization") String token)  throws ApiUserDefaultException {
             return new ResponseEntity<>(orderService.createOrder(order, token), HttpStatus.CREATED);
@@ -34,20 +46,20 @@ public class OrderRestController {
         return new ResponseEntity<>(orderService.findAllOrdersByUser(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Cancel Order",
+            description = ".Ex.: '/order/cancel",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Successfully canceled"),
+                    @ApiResponse(responseCode = "404", description = "Error interno", content = @Content(schema = @Schema(hidden = true)))
+            })
     @PostMapping("/cancel")
     public ResponseEntity<UserOrders> cancelOrder(@Valid @RequestBody CancelOrdersDTO orderdto) {
-        //cancela a ordem de Compra/Venda
-        //resititui o volume ou dollar balance que ainda não foi utilizado
         return new ResponseEntity<>(orderService.cancelOrder(orderdto), HttpStatus.OK);
     }
 
     @PostMapping("/paged")
     public ResponseEntity<Page<UserOrdersDto>> getPage(Pageable pageable) {
-        try {
-            return ResponseEntity.ok().body(orderService.findUserOrders(pageable));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok().body(orderService.findUserOrders(pageable));
     }
 
     @GetMapping("/matchs/buy/{id}")

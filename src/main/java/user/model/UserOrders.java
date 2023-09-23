@@ -6,6 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.*;
+import user.config.ApiUserDefaultException;
+import user.enums.OrderType;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -46,7 +49,7 @@ public class UserOrders implements Serializable {
     private Long remainingVolume;
 
     @Column(name = "type")
-    private Integer type;
+    private OrderType type;
 
     @Column(name = "status")
     private Integer status;
@@ -66,5 +69,14 @@ public class UserOrders implements Serializable {
 
     public UserOrders(){
         //construtor vazio
+    }
+
+    public void setType(Integer type) throws ApiUserDefaultException {
+        this.type =
+                switch (type){
+                    case 0 -> OrderType.BUY_ORDER;
+                    case 1 -> OrderType.SELL_ORDER;
+                    default -> throw new ApiUserDefaultException("unrecognized value");
+                };
     }
 }

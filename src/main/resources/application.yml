@@ -8,9 +8,13 @@ server:
 config:
     api-stocks-url: ${API_STOCKS_URL:http://localhost:8083}
     kafka-config:
-        address:  ${KAFKA_ADDRESS:54.232.4.177:19092,54.232.4.177:29092,54.232.4.177:39092}
+        address:  ${KAFKA_ADDRESS:http://localhost:19092}
         topic:
             name: stocks
+springdoc:
+    swagger-ui:
+        config-url: /v3/api-docs/swagger-config
+        url: /v3/api-docs
 spring:
     profiles:
         active: ${ACTIVE_PROFILE:development}
@@ -80,7 +84,7 @@ spring:
             on-profile: production
     datasource:
         driver-class-name: org.postgresql.Driver
-        url: ${DB_URL:jdbc:postgresql://containers-us-west-207.railway.app:5770/stocks_broker_user}
+        url: ${DB_URL:jdbc:postgresql://containers-us-west-120.railway.app:7876/stocks_broker_user}
         username: ${DB_USER:postgres}
         password: ${DB_PASSWD:postgres}
         hikari:

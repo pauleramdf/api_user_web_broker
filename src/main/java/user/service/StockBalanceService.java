@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import user.dto.userorders.UserOrdersDto;
 import user.dto.userstockbalances.CreateStockBalanceDTO;
 import user.dto.userstockbalances.WalletDTO;
 import user.model.User;
+import user.model.UserOrders;
 import user.model.UserStockBalances;
 import user.model.UserStockBalancesId;
 import user.repository.UserStockBalancesRepository;
@@ -68,4 +70,8 @@ public class StockBalanceService {
         return walletsPage.map(WalletDTO::new);
     }
 
+    public UserStockBalances findWalletOrCreate(User user, UserOrdersDto order) {
+        return findById(new UserStockBalancesId(user, order.getIdStock()))
+                .orElse(new UserStockBalances(new UserStockBalancesId(user, order.getIdStock()), order.getStockSymbol(), order.getStockName(), 0L));
+    }
 }

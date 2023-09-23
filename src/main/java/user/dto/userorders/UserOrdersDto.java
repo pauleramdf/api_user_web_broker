@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import user.config.ApiUserDefaultException;
 import user.model.User;
 import user.model.UserOrders;
 
@@ -43,7 +44,7 @@ public class UserOrdersDto {
     private Timestamp created;
     private Timestamp updated;
 
-    public UserOrders transformaParaObjeto(User user){
+    public UserOrders transformaParaObjeto(User user) throws ApiUserDefaultException {
         UserOrders order = new UserOrders();
         order.setUser(user);
         order.setIdStock(idStock);
@@ -68,7 +69,7 @@ public class UserOrdersDto {
         this.price = orders.getPrice();
         this.totalPrice = orders.getTotalPrice();
         this.remainingVolume = orders.getRemainingVolume();
-        this.type = orders.getType();
+        this.type = orders.getType().getValue();
         this.status = orders.getStatus();
         this.created = orders.getCreated();
         this.updated = orders.getUpdated();

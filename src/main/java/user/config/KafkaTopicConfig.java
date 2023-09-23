@@ -25,7 +25,7 @@ public class KafkaTopicConfig {
     public KafkaAdmin kafkaAdmin() {
         log.info("bootstrapAddress kafka admin", bootstrapAddress);
         Map<String, Object> configs = new HashMap<>();
-        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "54.232.4.177:19092,54.232.4.177:29092,54.232.4.177:39092");
+        configs.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
         return new KafkaAdmin(configs);
     }
 

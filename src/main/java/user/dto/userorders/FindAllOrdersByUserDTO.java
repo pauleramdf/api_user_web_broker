@@ -38,7 +38,7 @@ public class FindAllOrdersByUserDTO {
         this.price = u.getPrice();
         this.totalPrice = u.getTotalPrice();
         this.remainingVolume = u.getRemainingVolume();
-        this.type = u.getType();
+        this.type = u.getType().getValue();
         this.status = u.getStatus();
         this.created = u.getCreated();
         this.updated = u.getUpdated();
